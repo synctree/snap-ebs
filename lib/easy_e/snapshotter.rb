@@ -15,19 +15,15 @@ module EasyE::Snapshotter
     end
   end
 
+  # lazy loaders
   def compute
-    unless @compute
-      @compute = Fog::Compute.new({
-        :aws_access_key_id => access_key,
-        :aws_secret_access_key => secret_key,
-        :provider => "AWS"
-      }) 
-    end
-
-    @compute
+    @compute ||= Fog::Compute.new({
+      :aws_access_key_id => access_key,
+      :aws_secret_access_key => secret_key,
+      :provider => "AWS"
+    }) 
   end
 
-  # lazy loaders
   def attached_volumes
     @attached_volumes ||= compute.volumes.select { |vol| vol.server_id == instance_id }
   end
