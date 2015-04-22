@@ -25,9 +25,7 @@ module EasyE::Options
         end
       end
 
-      registered_plugins.each do |plugin|
-        plugin.collect_options option_parser
-      end
+      plugins.each { |plugin| plugin.collect_options @option_parser }
     end
 
     @option_parser

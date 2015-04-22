@@ -18,6 +18,10 @@ class EasyE
     @logger.debug "Debug logging enabled"
   end
 
+  def plugins
+    @plugins ||= registered_plugins.collect { |klass| klass.new }
+  end
+
   def registered_plugins
     EasyE::Plugin.registered_plugins
   end
