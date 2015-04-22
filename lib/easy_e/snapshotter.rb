@@ -1,11 +1,14 @@
 require 'csv'
 require 'fog/aws'
+require 'httparty'
 require 'pp'
 module EasyE::Snapshotter
-  attr_writer :storage, :compute
+  AWS_INSTANCE_ID_URL = 'http://169.254.169.254/latest/dynamic/instance-identity/document'
+
+  attr_writer :storage, :compute, :instance_id
   def take_snapshots
-    pp compute.servers
-    pp compute.volumes
+    instance_id
+    compute.volumes
     { foo: 'bar' }
   end
 
@@ -49,5 +52,9 @@ module EasyE::Snapshotter
     end
 
     @credentials
+  end
+
+  def instance_id
+    @instance_id ||= JSON.parse(HTTParty.get(AWS_INSTANCE_ID_URL))[:instanceId]
   end
 end
