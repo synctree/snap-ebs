@@ -4,8 +4,20 @@ module EasyE::Options
       @option_parser = OptionParser.new do |o|
         o.banner = "Usage: #{$0} [options]"
 
-        o.on("-v", "--[no-]verbose", "Run verbosely") do |v|
-          options[:verbose] = v
+        o.on("-v", "--[no-]verbose", "Run verbosely") do |val|
+          options[:verbose] = val
+        end
+
+        o.on("-a", "--access-key <AWS ACCESS KEY>", "AWS access key") do |val|
+          options[:access_key] = val
+        end
+
+        o.on("-s", "--secret-key <AWS SECRET KEY>", "AWS secret key") do |val|
+          options[:secret_key] = val
+        end
+
+        o.on("-c", "--credentials-file <FILE>", "Load AWS credentials from the downloaded CSV file (overrides -a and -s)") do |val|
+          options[:credentials_file] = val
         end
       end
     end

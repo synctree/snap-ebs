@@ -4,7 +4,6 @@ describe EasyE::Snapshotter do
   let(:easy_e) {
     result = EasyE.new
     result.compute = spy 'compute'
-    result.storage = spy 'storage'
     result
   }
 
@@ -26,10 +25,6 @@ describe EasyE::Snapshotter do
     context "compute" do 
       subject { easy_e.compute }
       it { is_expected.to have_received(:servers)}
-    end
-
-    context "storage" do 
-      subject { easy_e.storage }
       it { is_expected.to have_received(:volumes)}
     end
   end
