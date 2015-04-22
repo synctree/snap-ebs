@@ -21,10 +21,4 @@ class EasyE
   def registered_plugins
     EasyE::Plugin.registered_plugins
   end
-
-  def collect_options
-    registered_plugins.each do |klass|
-      klass.collect_options option_parser
-    end
-  end
 end

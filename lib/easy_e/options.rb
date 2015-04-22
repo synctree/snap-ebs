@@ -24,6 +24,10 @@ module EasyE::Options
           options[:mock] = val
         end
       end
+
+      registered_plugins.each do |plugin|
+        plugin.collect_options option_parser
+      end
     end
 
     @option_parser
