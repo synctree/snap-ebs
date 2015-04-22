@@ -27,38 +27,21 @@ module EasyE::Snapshotter
     @compute
   end
 
+  # lazy loaders
   def attached_volumes
-    compute.volumes.select { |vol| vol.server_id == instance_id }
+    @attached_volumes ||= compute.volumes.select { |vol| vol.server_id == instance_id }
   end
 
   def access_key
-    unless @access_key
-      if options[:credentials_file]
-        @access_key = credentials.first["Access Key Id"]
-      else
-        @access_key = options[:access_key]
-      end
-    end
-    @access_key
+    @access_key ||= if options[:credentials_file] then credentials.first["Access Key Id"] else options[:access_key] end
   end
 
   def secret_key
-    unless @secret_key
-      if options[:credentials_file]
-        @secret_key = credentials.first["Secret Access Key"]
-      else
-        @secret_key = options[:secret_key]
-      end
-    end
-    @secret_key
+    @secret_key ||= if options[:credentials_file] then credentials.first["Secret Access Key"] else options[:secret_key] end
   end
 
   def credentials
-    unless @credentials
-      @credentials = CSV.parse(File.read(options[:credentials_file]), :headers => true)
-    end
-
-    @credentials
+    @credentials ||= CSV.parse(File.read(options[:credentials_file]), :headers => true)
   end
 
   def instance_id
