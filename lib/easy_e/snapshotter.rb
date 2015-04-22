@@ -1,5 +1,4 @@
 require 'csv'
-require 'fog/aws'
 require 'httparty'
 require 'pp'
 module EasyE::Snapshotter
@@ -18,6 +17,7 @@ module EasyE::Snapshotter
 
   # lazy loaders
   def compute
+    require 'fog/aws'
     @compute ||= Fog::Compute.new({
       :aws_access_key_id => access_key,
       :aws_secret_access_key => secret_key,
