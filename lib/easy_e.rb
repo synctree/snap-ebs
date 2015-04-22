@@ -4,9 +4,11 @@ class EasyE
 end
 
 require 'easy_e/options'
+require 'easy_e/snapshotter'
 
 class EasyE
   include EasyE::Options
+  include EasyE::Snapshotter
   attr_accessor :logger, :options
   def initialize(logger = false)
     @options = { }
