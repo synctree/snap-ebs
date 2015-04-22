@@ -7,10 +7,11 @@ module EasyE::Snapshotter
 
   attr_writer :storage, :compute, :instance_id
   def take_snapshots
-    compute.volumes.collect do |vol|
-      vol.server_id == instance_id
+    attached_volumes.each do |vol|
+      snapshot = compute.snapshots.new
+      snapshot.volume_id = vol.volume_id
+      snapshot.save
     end
-    { foo: 'bar' }
   end
 
   def compute
@@ -23,6 +24,10 @@ module EasyE::Snapshotter
     end
 
     @compute
+  end
+
+  def attached_volumes
+    compute.volumes.select { |vol| vol.server_id == instance_id }
   end
 
   def access_key
@@ -56,6 +61,6 @@ module EasyE::Snapshotter
   end
 
   def instance_id
-    @instance_id ||= JSON.parse(HTTParty.get(AWS_INSTANCE_ID_URL))[:instanceId]
+    @instance_id ||= JSON.parse(HTTParty.get(AWS_INSTANCE_ID_URL))["instanceId"]
   end
 end
