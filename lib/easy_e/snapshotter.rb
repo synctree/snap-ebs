@@ -7,8 +7,9 @@ module EasyE::Snapshotter
 
   attr_writer :storage, :compute, :instance_id
   def take_snapshots
-    instance_id
-    compute.volumes
+    compute.volumes.collect do |vol|
+      vol.server_id == instance_id
+    end
     { foo: 'bar' }
   end
 
