@@ -19,6 +19,10 @@ module EasyE::Options
         o.on("-c", "--credentials-file <FILE>", "Load AWS credentials from the downloaded CSV file (overrides -a and -s)") do |val|
           options[:credentials_file] = val
         end
+
+        o.on("-m", "--[no]-mock", "Mock out AWS calls for testing in Vagrant") do |val|
+          options[:mock] = val
+        end
       end
     end
 
