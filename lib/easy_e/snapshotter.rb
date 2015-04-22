@@ -7,10 +7,11 @@ module EasyE::Snapshotter
 
   attr_writer :storage, :compute, :instance_id
   def take_snapshots
-    attached_volumes.each do |vol|
+    attached_volumes.collect do |vol|
       snapshot = compute.snapshots.new
       snapshot.volume_id = vol.volume_id
       snapshot.save
+      snapshot
     end
   end
 
