@@ -1,11 +1,11 @@
 class EasyE::Plugin
-  @@plugins = []
+  @@registered_plugins = []
   def self.inherited(klass)
-    plugins.unshift klass
+    registered_plugins.unshift klass
   end
 
-  def self.plugins
-    @@plugins
+  def self.registered_plugins
+    @@registered_plugins
   end
 end
 

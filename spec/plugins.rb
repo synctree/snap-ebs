@@ -1,16 +1,20 @@
 describe EasyE::Plugin do
-  let(:easy_e) { EasyE.new }
-
-  context "on startup" do
-    context "loaded plugins" do
-      before do
-        class TestClass < EasyE::Plugin
-        end
+  before do
+    class TestPlugin < EasyE::Plugin
+      def self.collect_options option_parser
       end
-
-      subject { easy_e.plugins }
-      it { is_expected.to be_an Array }
-      it { is_expected.to include TestClass }
     end
+  end
+
+  let(:easy_e) { EasyE.new }
+  context "all registered plugins" do
+    before do
+      expect(TestPlugin).to receive(:collect_options).with(easy_e.option_parser)
+      easy_e.collect_options
+    end
+
+    subject { easy_e.registered_plugins }
+    it { is_expected.to be_an Array }
+    it { is_expected.to include TestPlugin }
   end
 end
