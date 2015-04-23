@@ -1,4 +1,4 @@
-class EasyE::Plugin::Mysql < EasyE::Plugin
+class EasyE::Plugin::MysqlPlugin < EasyE::Plugin
   def defined_options
     {
       user: 'MySql Username',
@@ -9,12 +9,14 @@ class EasyE::Plugin::Mysql < EasyE::Plugin
   end
 
   def before
+    require 'mysql'
+    Mysql.new
   end
 
   def after
   end
 
   def name
-    "MySql"
+    "Mysql"
   end
 end

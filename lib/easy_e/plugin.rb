@@ -24,4 +24,4 @@ class EasyE::Plugin
   end
 end
 
-require 'plugins/mysql'
+require 'plugins/mysql_plugin'
