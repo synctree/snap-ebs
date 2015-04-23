@@ -28,6 +28,7 @@ class EasyE
 
   def run
     plugins.each { |plugin| plugin.before }
+    take_snapshots
     plugins.each { |plugin| plugin.after }
   end
 end

@@ -46,8 +46,9 @@ describe EasyE::Plugin do
 
       context "then run" do
         before do
-          expect(test_plugin).to receive(:before)
-          expect(test_plugin).to receive(:after)
+          expect(test_plugin).to receive(:before).and_call_original
+          expect(test_plugin).to receive(:after).and_call_original
+          expect(easy_e).to receive(:take_snapshots) # and don't call original
         end
         before(:each) { easy_e.run }
         subject { test_plugin }
