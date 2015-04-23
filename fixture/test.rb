@@ -8,4 +8,8 @@ class EasyE::Plugin::Test < EasyE::Plugin
 
   def after
   end
+
+  def name
+    "Test"
+  end
 end

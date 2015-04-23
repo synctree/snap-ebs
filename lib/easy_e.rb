@@ -25,4 +25,9 @@ class EasyE
   def registered_plugins
     EasyE::Plugin.registered_plugins
   end
+
+  def run
+    plugins.each { |plugin| plugin.before }
+    plugins.each { |plugin| plugin.after }
+  end
 end

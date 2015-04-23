@@ -22,10 +22,6 @@ class EasyE::Plugin
       end
     end
   end
-
-  def name
-    @name ||= self.class.name.split("::").last
-  end
 end
 
 require 'plugins/mysql'

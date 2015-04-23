@@ -7,4 +7,14 @@ class EasyE::Plugin::Mysql < EasyE::Plugin
       host: 'MySql host'
     }
   end
+
+  def before
+  end
+
+  def after
+  end
+
+  def name
+    "MySql"
+  end
 end

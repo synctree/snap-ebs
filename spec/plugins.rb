@@ -43,6 +43,16 @@ describe EasyE::Plugin do
 
       subject { test_plugin.options }
       it { is_expected.to include option: "foo" }
+
+      context "then run" do
+        before do
+          expect(test_plugin).to receive(:before)
+          expect(test_plugin).to receive(:after)
+        end
+        before(:each) { easy_e.run }
+        subject { test_plugin }
+        it { is_expected.to be }
+      end
     end
   end
 
