@@ -1,5 +1,11 @@
 class EasyE::Plugin::Test < EasyE::Plugin
   def defined_options
-    { test: 'test option' }
+    { option: 'test option' }
+  end
+
+  def before
+  end
+
+  def after
   end
 end

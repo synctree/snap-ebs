@@ -10,9 +10,13 @@ class EasyE::Plugin
   end
 
   def collect_options option_parser
-    defined_options.each do |name, description|
-      option_parser.on nil, "--#{name}", description do |val| end
+    defined_options.each do |option_name, description|
+      option_parser.on nil, "--#{name.downcase}-#{option_name}", description do |val| end
     end
+  end
+
+  def name
+    @name ||= self.class.name.split("::").last
   end
 end
 

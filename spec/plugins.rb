@@ -27,8 +27,17 @@ describe EasyE::Plugin do
 
     subject { easy_e.option_parser }
     it { is_expected.to be_an OptionParser }
-    it "includes the --test option" do
-      expect(subject.to_a.select { |x| x[/--test/] }).not_to be_empty
+    it "includes the --test-option option" do
+      expect(subject.to_a.select { |x| x[/--test-option/] }).not_to be_empty
+    end
+  end
+
+  context "test plugin" do
+    let(:test_plugin) { EasyE::Plugin::Test.new }
+
+    context "name" do
+      subject { test_plugin.name }
+      it { is_expected.to eq 'Test' }
     end
   end
 end
