@@ -1,0 +1,7 @@
+---
+mongod_smallfiles: "true"
+mongod_port: 2700
+mongod_replication: true
+mongod_repl_servers: ["master", "slave"]
+mongod_repl_master: "master"
+mongod_replset_name: easy-e

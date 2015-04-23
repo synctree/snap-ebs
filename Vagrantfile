@@ -6,7 +6,7 @@ Vagrant.configure(VAGRANT_FILE_API_VERSION) do |config|
 
   count = 1
   
-  %w(mysql-master mysql-slave).each do |role|
+  %w(master slave).each do |role|
     count += 1
     config.vm.define role do |s|
       s.vm.box       = 'ubuntu/precise64'
@@ -15,12 +15,11 @@ Vagrant.configure(VAGRANT_FILE_API_VERSION) do |config|
 
       s.vm.provision "ansible" do |ansible|
         ansible.groups = {
-          "mysql-master" => [ "mysql-master" ],
-          "mysql-slave" => [ "mysql-slave" ]
+          "master" => [ "master" ],
+          "slave" => [ "slave" ]
         }
-        ansible.limit          = role
-        # ansible.inventory_path = 'provision'
-        ansible.playbook       = 'playbook.yml'
+        ansible.playbook = 'playbook.yml'
+        ansible.verbose = 'vvv'
       end
     end
   end

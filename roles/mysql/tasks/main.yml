@@ -1,3 +1,12 @@
 ---
-- include: install.yml
-- include: start.yml
+- name: install mysql
+  apt:
+    name=mysql-server
+    state=present
+    update_cache=yes
+
+- name: start the MySQL service
+  service: 
+    name: mysql 
+    state: restarted
+    enabled: true
