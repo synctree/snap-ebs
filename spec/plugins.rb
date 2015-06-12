@@ -36,13 +36,13 @@ describe EasyE::Plugin do
       expect(subject.to_a.select { |x| x[/--test-option/] }).not_to be_empty
     end
 
-    context 'when receiving ["--test-option", "foo" ]' do
+    context 'when receiving ["--test", "--test-option", "foo" ]' do
       before(:each) do
-        option_parser.parse! [ "--test-option=foo", "foo" ]
+        option_parser.parse! ["--test", "--test-option=foo", "foo" ]
       end
 
-      subject { test_plugin.options }
-      it { is_expected.to include option: "foo" }
+      subject { test_plugin.options.option }
+      it { is_expected.to eql "foo" }
 
       context "then run" do
         before do

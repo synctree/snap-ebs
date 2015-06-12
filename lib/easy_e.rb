@@ -27,8 +27,8 @@ class EasyE
   end
 
   def run
-    plugins.each { |plugin| plugin.before }
+    plugins.each { |plugin| plugin.before if plugin.options.enable }
     take_snapshots
-    plugins.each { |plugin| plugin.after }
+    plugins.each { |plugin| plugin.after if plugin.options.enable }
   end
 end
