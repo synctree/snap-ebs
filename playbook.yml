@@ -3,5 +3,6 @@
   remote_user: vagrant
   sudo: yes
   roles:
+    - vagrant
     - mysql
     - bennojoy.mongo_mongod
