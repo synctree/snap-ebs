@@ -1,4 +1,5 @@
 require 'logger'
+require 'ostruct'
 
 class EasyE
 end
@@ -13,7 +14,7 @@ class EasyE
 
   attr_accessor :logger, :options
   def initialize(logger = false)
-    @options = { }
+    @options = OpenStruct.new
     @logger = (logger or Logger.new(false))
     @logger.debug "Debug logging enabled"
   end

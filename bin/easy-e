@@ -12,4 +12,4 @@ end
 
 easy_e = EasyE.new logger
 easy_e.option_parser.parse!
-easy_e.take_snapshots
+easy_e.run

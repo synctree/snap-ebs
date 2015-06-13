@@ -2,7 +2,7 @@ require 'ostruct'
 class EasyE::Plugin
   @@registered_plugins = []
 
-  attr_reader :options
+  attr_reader :options, :logger
 
   def self.inherited(klass)
     registered_plugins.unshift klass
@@ -12,7 +12,8 @@ class EasyE::Plugin
     @@registered_plugins
   end
 
-  def initialize
+  def initialize logger = false
+    @logger = (logger or Logger.new(false))
     @options = OpenStruct.new
   end
 
@@ -30,3 +31,4 @@ class EasyE::Plugin
 end
 
 require 'plugins/mysql_plugin'
+require 'plugins/mongo_plugin'

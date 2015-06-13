@@ -1,8 +1,47 @@
-# Idempotent way to build a /etc/hosts file with Ansible using your Ansible hosts inventory for a source.
-# Will include all hosts the playbook is run on.
+---
+# Idempotent way to build a /etc/hosts file with Ansible using your Ansible
+# hosts inventory for a source. Will include all hosts the playbook is run on.
 # Inspired from http://xmeblog.blogspot.com/2013/06/ansible-dynamicaly-update-etchosts.html
- 
+
 - name: "Build hosts file"
   lineinfile: dest=/etc/hosts regexp='.*{{ item }}$' line="{{ hostvars[item].ansible_eth1.ipv4.address }} {{item}}" state=present
   when: hostvars[item].ansible_eth1.ipv4.address is defined
   with_items: groups['all']
+
+- name: Install ruby dependencies
+  apt: pkg="{{ item }}" state=installed update-cache=yes
+  with_items:
+    - bison
+    - build-essential
+    - git-core
+    - libdigest-hmac-perl
+    - libffi-dev
+    - libgdbm-dev
+    - libmysqlclient-dev
+    - libncurses5-dev
+    - libreadline6-dev
+    - libsqlite3-dev
+    - libssl-dev
+    - libtool
+    - libyaml-dev
+    - sqlite3
+    - unzip
+    - zlib1g
+    - zlib1g-dev
+
+- name: Download ruby
+  get_url: url='{{ ruby_url }}' dest=/home/vagrant/ruby-{{ ruby_version }}.tar
+
+- name: Extract ruby
+  command: tar -zxf /home/vagrant/ruby-{{ ruby_version }}.tar creates=/home/vagrant/ruby-{{ ruby_version }}
+
+- name: Make, configure, and install ruby
+  command: '{{ item }} chdir=/home/vagrant/ruby-{{ ruby_version }}'
+  with_items:
+    - ./configure
+    - make
+    - sudo make install
+
+- name: Install Bundler
+  command: gem install bundler
+

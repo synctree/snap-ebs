@@ -1,5 +1,5 @@
 Gem::Specification.new do |s|
-  s.name        = 'hola'
+  s.name        = 'easy-e'
   s.version     = '0.0.0'
   s.date        = '2015-04-21'
   s.summary     = "Easy EBS snapshots that work"

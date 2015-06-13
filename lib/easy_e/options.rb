@@ -20,7 +20,7 @@ module EasyE::Options
           options[:credentials_file] = val
         end
 
-        o.on("-m", "--[no]-mock", "Mock out AWS calls for testing in Vagrant") do |val|
+        o.on("-m", "--[no-]mock", "Mock out AWS calls for testing in Vagrant") do |val|
           options[:mock] = val
         end
       end

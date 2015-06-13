@@ -18,6 +18,7 @@ module EasyE::Snapshotter
   # lazy loaders
   def compute
     require 'fog/aws'
+    Fog.mock! if options[:mock]
     @compute ||= Fog::Compute.new({
       :aws_access_key_id => access_key,
       :aws_secret_access_key => secret_key,
