@@ -24,7 +24,10 @@ describe EasyE::Plugin::MongoPlugin do
         end
 
         subject { connection }
-        it { is_expected.to receive(:command).with(serverStatus: 1) }
+        it do
+          is_expected.to receive(:command).once.with(serverStatus: 1).and_raise Errno::ECONNREFUSED.new('no mongo here!')
+          is_expected.to receive(:command).once.with(serverStatus: 1)
+        end
       end
     end
   end
