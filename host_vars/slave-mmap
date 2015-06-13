@@ -1,0 +1,15 @@
+---
+mongod_smallfiles: "true"
+mongod_port: 2700
+mongod_replication: true
+mongod_repl_servers: ["master", "slave"]
+mongod_repl_master: "master"
+mongod_replset_name: easy-e
+mongod_repo_debian: "deb http://repo.mongodb.org/apt/ubuntu trusty/mongodb-org/3.0 multiverse"
+mongod_pkgs:
+  - python-selinux
+  - mongodb-org
+  - python-pymongo
+mongod_storage_engine: mmapv1
+mongod_auth: false
+mongod_bind_ip: 0.0.0.0
