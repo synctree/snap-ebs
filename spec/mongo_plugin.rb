@@ -6,6 +6,18 @@ describe EasyE::Plugin::MongoPlugin do
   let(:connection) { spy 'Mongo connection' } 
   let(:connection2) { spy 'Mongo connection #2' } 
 
+  context "with authentication enabled" do
+    before :each do
+      plugin.options.user = 'user'
+      plugin.options.password = 'password'
+      expect(Mongo::Client).to receive(:new).with("mongodb://localhost:27017", user: 'user', password: 'password').and_return(connection)
+      plugin.before
+    end
+
+    subject { plugin }
+    it { is_expected.to be }
+  end
+
   context "when connection succeeds" do
     before :each do
       expect(Mongo::Client).to receive(:new).and_return(connection)

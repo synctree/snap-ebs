@@ -6,6 +6,8 @@ class EasyE::Plugin::MongoPlugin < EasyE::Plugin
     {
       service: 'Service to start after shutting down server',
       shutdown: 'Shutdown mongodb server (this is required if your data and journal are on different volumes',
+      user: 'Mongo user',
+      password: 'Mongo password',
       port: 'Mongo port',
       host: 'Mongo host'
     }
@@ -21,7 +23,7 @@ class EasyE::Plugin::MongoPlugin < EasyE::Plugin
   end
 
   def client
-    @client ||= Mongo::Client.new "mongodb://#{options.host}:#{options.port}"
+    @client ||= Mongo::Client.new "mongodb://#{options.host}:#{options.port}", user: options.user, password: options.password
   end
 
   def before
