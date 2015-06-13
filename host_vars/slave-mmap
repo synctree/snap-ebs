@@ -11,5 +11,5 @@ mongod_pkgs:
   - mongodb-org
   - python-pymongo
 mongod_storage_engine: mmapv1
-mongod_auth: false
 mongod_bind_ip: 0.0.0.0
+mongod_use_key: false

@@ -7,10 +7,3 @@
   lineinfile: dest=/etc/hosts regexp='.*{{ item }}$' line="{{ hostvars[item].ansible_eth1.ipv4.address }} {{item}}" state=present
   when: hostvars[item].ansible_eth1.ipv4.address is defined
   with_items: groups['all']
-
-- shell: ruby --version | cut -f 2 -d ' ' | sed -e 's/\([0-9.]*\).*/\1/'
-  register: ruby_version_check
-  changed_when: false
-
-- include: ruby.yml
-  when: ruby_version_check.stdout | version_compare(ruby_version, operator='!=')
