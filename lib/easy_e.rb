@@ -20,7 +20,7 @@ class EasyE
   end
 
   def plugins
-    @plugins ||= registered_plugins.collect { |klass| klass.new }
+    @plugins ||= registered_plugins.collect { |klass| klass.new logger }
   end
 
   def registered_plugins
