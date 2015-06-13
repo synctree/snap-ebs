@@ -2,6 +2,7 @@ require 'mongo'
 describe EasyE::Plugin::MongoPlugin do
   let(:plugin) { EasyE::Plugin::MongoPlugin.new }
   let(:connection) { spy 'Mongo connection' } 
+  let(:connection2) { spy 'Mongo connection #2' } 
 
   context "when connection succeeds" do
     before :each do
@@ -15,6 +16,7 @@ describe EasyE::Plugin::MongoPlugin do
 
       context "and start up succeeds" do
         before :each do
+          expect(Mongo::Client).to receive(:new).and_return(connection2)
           expect(plugin).to receive(:system).with('service mongodb start')
           plugin.before
         end
@@ -23,7 +25,7 @@ describe EasyE::Plugin::MongoPlugin do
           plugin.after
         end
 
-        subject { connection }
+        subject { connection2 }
         it do
           is_expected.to receive(:command).once.with(serverStatus: 1).and_raise Errno::ECONNREFUSED.new('no mongo here!')
           is_expected.to receive(:command).once.with(serverStatus: 1)

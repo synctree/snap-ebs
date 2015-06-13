@@ -29,6 +29,9 @@ class EasyE::Plugin::MongoPlugin < EasyE::Plugin
     rescue Mongo::Error::SocketError => e
       logger.debug "Received expected socket error"
     end
+
+    # we need a new connection now since the server has shut down
+    @client = nil
   end
 
   def after
