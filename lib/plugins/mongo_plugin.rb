@@ -38,7 +38,12 @@ class EasyE::Plugin::MongoPlugin < EasyE::Plugin
   def after
     start_mongo if wired_tiger? and  options.shutdown
     logger.info "Verifying that mongodb came back up..."
-    logger.debug client.command(serverStatus: 1).first
+    
+    if client.command(serverStatus: 1).first
+      logger.info "Received status from mongo, seems to have come back up"
+    else
+      logger.error "Unable to get server status!" unless status
+    end
   end
 
   def name
