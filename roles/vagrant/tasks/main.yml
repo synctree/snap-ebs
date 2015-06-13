@@ -8,10 +8,9 @@
   when: hostvars[item].ansible_eth1.ipv4.address is defined
   with_items: groups['all']
 
-- shell: ruby --version | grep {{ ruby_version }}
-  register: have_desired_ruby
-  ignore_errors: true
-  changed_when: have_desired_ruby.rc != 0
+- shell: ruby --version | cut -f 2 -d ' ' | sed -e 's/\([0-9.]*\).*/\1/'
+  register: ruby_version_check
+  changed_when: false
 
 - include: ruby.yml
-  when: have_desired_ruby|failed
+  when: ruby_version_check.stdout | version_compare(ruby_version, operator='!=')

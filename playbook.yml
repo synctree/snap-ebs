@@ -4,5 +4,5 @@
   sudo: yes
   roles:
     - vagrant
-    - mysql
+    # - mysql
     - bennojoy.mongo_mongod

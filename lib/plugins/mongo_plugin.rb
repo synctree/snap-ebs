@@ -67,6 +67,5 @@ class EasyE::Plugin::MongoPlugin < EasyE::Plugin
 
   def start_mongo
     system "service #{options[:service]} start"
-    pp client.command(serverStatus: 1).to_a
   end
 end

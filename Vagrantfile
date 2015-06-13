@@ -20,7 +20,7 @@ Vagrant.configure(VAGRANT_FILE_API_VERSION) do |config|
   end
 
   config.vm.define 'slave' do |s|
-    s.vm.box       = 'ubuntu/precise64'
+    s.vm.box       = 'ubuntu/trusty64'
     s.vm.host_name = 'slave'
     s.vm.network 'private_network', ip: "192.168.10.3"
 
