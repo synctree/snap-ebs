@@ -7,7 +7,7 @@ describe EasyE::Plugin::MongoPlugin do
     context "before" do
       before do
         expect(Mongo::Client).to receive(:new).and_return(connection)
-        expect(connection).to receive(:command).with(shutdown: 1)
+        expect(connection).to receive(:command).with(shutdown: 1).and_raise(Mongo::Error::SocketError.new 'boom!')
         expect(plugin).to receive(:system).with('service mongodb start')
         plugin.before
       end

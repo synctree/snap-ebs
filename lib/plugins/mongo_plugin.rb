@@ -23,7 +23,13 @@ class EasyE::Plugin::MongoPlugin < EasyE::Plugin
     cmd[:shutdown] = 1
     logger.debug 'running command'
     logger.debug cmd
-    client.command cmd
+
+    begin
+      # this will always raise an exception after it completes
+      client.command cmd
+    rescue Mongo::Error::SocketError => e
+      logger.debug "Received expected socket error"
+    end
   end
 
   def after
