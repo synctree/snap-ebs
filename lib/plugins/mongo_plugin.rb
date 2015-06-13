@@ -3,6 +3,7 @@ class EasyE::Plugin::MongoPlugin < EasyE::Plugin
   def defined_options
     {
       service: 'Service to start after shutting down server',
+      shutdown: 'Shutdown mongodb server (this is required if your data and journal are on different volumes',
       port: 'Mongo port',
       host: 'Mongo host'
     }
@@ -12,6 +13,7 @@ class EasyE::Plugin::MongoPlugin < EasyE::Plugin
     {
       service: 'mongodb',
       port: '27017',
+      shutdown: false,
       host: 'localhost'
     }
   end
@@ -22,23 +24,36 @@ class EasyE::Plugin::MongoPlugin < EasyE::Plugin
 
   def before
     require 'mongo'
+    shutdown_mongo if options.shutdown
+  end
+
+  def after
+    start_mongo if options.shutdown
+  end
+
+  def name
+    "Mongo"
+  end
+
+  private
+
+  def shutdown_mongo
     logger.info 'Shutting down mongodb'
     begin
       # this will always raise an exception after it completes
       client.command shutdown: 1
     rescue Mongo::Error::SocketError => e
-      logger.debug "Received expected socket error"
+      logger.debug "Received expected socket error after shutting down"
     end
 
     # we need a new connection now since the server has shut down
     @client = nil
   end
 
-  def after
+  def start_mongo
     system "service #{options[:service]} start"
 
     done = false
-
     until done
       begin
         client.command serverStatus: 1
@@ -48,9 +63,5 @@ class EasyE::Plugin::MongoPlugin < EasyE::Plugin
         sleep 1
       end
     end
-  end
-
-  def name
-    "Mongo"
   end
 end
