@@ -1,39 +1,60 @@
 require 'mongo'
+WT_STATUS = [{ "#{EasyE::Plugin::MongoPlugin::WIRED_TIGER_KEY}" => { } }]
+MMAP_STATUS = [{ }]
 describe EasyE::Plugin::MongoPlugin do
   let(:plugin) { EasyE::Plugin::MongoPlugin.new }
   let(:connection) { spy 'Mongo connection' } 
   let(:connection2) { spy 'Mongo connection #2' } 
 
-  context "with --mongo-shutdown enabled" do
+  context "when connection succeeds" do
     before :each do
-      plugin.options.shutdown = true
+      expect(Mongo::Client).to receive(:new).and_return(connection)
     end
 
-    context "when connection succeeds" do
+    context "with --mongo-shutdown enabled" do
       before :each do
-        expect(Mongo::Client).to receive(:new).and_return(connection)
+        plugin.options.shutdown = true
       end
 
-      context "and shutdown succeeds" do
+      context "on mmapv1" do
         before :each do
-          expect(connection).to receive(:command).with(shutdown: 1).and_raise(Mongo::Error::SocketError.new 'boom!')
+          expect(connection).to receive(:command).with(serverStatus: 1).and_return(MMAP_STATUS)
+          # expect(connection2).to receive(:command).with(serverStatus: 1).and_return(MMAP_STATUS)
+          expect(connection).not_to receive(:command).with(shutdown: 1)
+          plugin.before
         end
 
-        context "and start up succeeds" do
+        after :each do
+          plugin.after
+        end
+
+        subject { connection }
+        it { is_expected.to be }
+      end
+
+      context "on wired tiger" do
+        before :each do
+          expect(connection).to receive(:command).with(serverStatus: 1).and_return(WT_STATUS)
+        end
+
+        context "and shutdown succeeds" do
           before :each do
-            expect(Mongo::Client).to receive(:new).and_return(connection2)
-            expect(plugin).to receive(:system).with('service mongodb start')
-            plugin.before
+            expect(connection).to receive(:command).with(shutdown: 1).and_raise(Mongo::Error::SocketError.new 'boom!')
           end
 
-          after :each do
-            plugin.after
-          end
+          context "and start up succeeds" do
+            before :each do
+              expect(Mongo::Client).to receive(:new).and_return(connection2)
+              expect(plugin).to receive(:system).with('service mongodb start')
+              plugin.before
+            end
 
-          subject { connection2 }
-          it do
-            is_expected.to receive(:command).once.with(serverStatus: 1).and_raise Errno::ECONNREFUSED.new('no mongo here!')
-            is_expected.to receive(:command).once.with(serverStatus: 1)
+            after :each do
+              plugin.after
+            end
+
+            subject { connection2 }
+            it { is_expected.to receive(:command).once.with(serverStatus: 1) }
           end
         end
       end

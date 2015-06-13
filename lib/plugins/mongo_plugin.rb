@@ -1,4 +1,6 @@
+require 'pp'
 class EasyE::Plugin::MongoPlugin < EasyE::Plugin
+  WIRED_TIGER_KEY = 'wiredTiger'
   attr_accessor :client
   def defined_options
     {
@@ -24,11 +26,17 @@ class EasyE::Plugin::MongoPlugin < EasyE::Plugin
 
   def before
     require 'mongo'
-    shutdown_mongo if options.shutdown
+    if wired_tiger?
+      logger.info "Wired Tiger storage engine detected"
+    else
+      logger.info "MMAPv1 storage engine detected"
+    end
+
+    shutdown_mongo if wired_tiger? and options.shutdown
   end
 
   def after
-    start_mongo if options.shutdown
+    start_mongo if wired_tiger? and  options.shutdown
   end
 
   def name
@@ -36,6 +44,13 @@ class EasyE::Plugin::MongoPlugin < EasyE::Plugin
   end
 
   private
+
+  def wired_tiger?
+    if @wired_tiger.nil?
+      @wired_tiger = client.command(serverStatus: 1).first.has_key? WIRED_TIGER_KEY
+    end
+    @wired_tiger
+  end
 
   def shutdown_mongo
     logger.info 'Shutting down mongodb'
@@ -52,16 +67,6 @@ class EasyE::Plugin::MongoPlugin < EasyE::Plugin
 
   def start_mongo
     system "service #{options[:service]} start"
-
-    done = false
-    until done
-      begin
-        client.command serverStatus: 1
-        done = true
-      rescue Errno::ECONNREFUSED => e
-        logger.info "Unable to connect to mongo (#{e}), retrying shortly"
-        sleep 1
-      end
-    end
+    pp client.command(serverStatus: 1).to_a
   end
 end
