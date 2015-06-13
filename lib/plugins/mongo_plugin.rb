@@ -8,6 +8,14 @@ class EasyE::Plugin::MongoPlugin < EasyE::Plugin
     }
   end
 
+  def default_options
+    {
+      service: 'mongodb',
+      port: '27017',
+      host: 'localhost'
+    }
+  end
+
   def before
     require 'mongo'
     client = Mongo::Client.new "mongodb://#{options.host}:#{options.port}"
