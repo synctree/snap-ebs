@@ -16,17 +16,16 @@ class EasyE::Plugin::MongoPlugin < EasyE::Plugin
     }
   end
 
+  def client
+    @client ||= Mongo::Client.new "mongodb://#{options.host}:#{options.port}"
+  end
+
   def before
     require 'mongo'
-    client = Mongo::Client.new "mongodb://#{options.host}:#{options.port}"
-    cmd = { }
-    cmd[:shutdown] = 1
-    logger.debug 'running command'
-    logger.debug cmd
-
+    logger.info 'Shutting down mongodb'
     begin
       # this will always raise an exception after it completes
-      client.command cmd
+      client.command shutdown: 1
     rescue Mongo::Error::SocketError => e
       logger.debug "Received expected socket error"
     end
@@ -34,6 +33,18 @@ class EasyE::Plugin::MongoPlugin < EasyE::Plugin
 
   def after
     system "service #{options[:service]} start"
+
+    done = false
+
+    until done
+      begin
+        client.command serverStatus: 1
+        done = true
+      rescue Errno::ECONNREFUSED => e
+        logger.info "Unable to connect to mongo (#{e}), retrying shortly"
+        sleep 1
+      end
+    end
   end
 
   def name
