@@ -37,6 +37,8 @@ class EasyE::Plugin::MongoPlugin < EasyE::Plugin
 
   def after
     start_mongo if wired_tiger? and  options.shutdown
+    logger.info "Verifying that mongodb came back up..."
+    logger.debug client.command(serverStatus: 1).first
   end
 
   def name
@@ -66,6 +68,7 @@ class EasyE::Plugin::MongoPlugin < EasyE::Plugin
   end
 
   def start_mongo
+    logger.info "Starting mongodb via 'service #{options[:service]} start'"
     system "service #{options[:service]} start"
   end
 end

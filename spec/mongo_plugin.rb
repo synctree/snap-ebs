@@ -19,7 +19,6 @@ describe EasyE::Plugin::MongoPlugin do
       context "on mmapv1" do
         before :each do
           expect(connection).to receive(:command).with(serverStatus: 1).and_return(MMAP_STATUS)
-          # expect(connection2).to receive(:command).with(serverStatus: 1).and_return(MMAP_STATUS)
           expect(connection).not_to receive(:command).with(shutdown: 1)
           plugin.before
         end
