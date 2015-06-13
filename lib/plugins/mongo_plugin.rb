@@ -27,7 +27,7 @@ class EasyE::Plugin::MongoPlugin < EasyE::Plugin
   end
 
   def after
-    `service #{options[:service]} start`
+    system "service #{options[:service]} start"
   end
 
   def name
