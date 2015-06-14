@@ -28,6 +28,11 @@ class EasyE::Plugin::MongoPlugin < EasyE::Plugin
 
   def before
     require 'mongo'
+    if primary?
+      logger.error "This appears to be a primary member, refusing to touch mongo"
+      return
+    end
+
     if wired_tiger?
       logger.info "Wired Tiger storage engine detected"
       shutdown_mongo and options.shutdown
@@ -64,6 +69,13 @@ class EasyE::Plugin::MongoPlugin < EasyE::Plugin
       @wired_tiger = client.command(serverStatus: 1).first.has_key? WIRED_TIGER_KEY
     end
     @wired_tiger
+  end
+
+  def primary?
+    if @primary.nil?
+      @primary = client.command(isMaster: 1).first['ismaster']
+    end
+    @primary
   end
 
   def shutdown_mongo

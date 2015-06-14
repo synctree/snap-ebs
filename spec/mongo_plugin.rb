@@ -9,16 +9,37 @@ FSYNC_LOCK_SUCCESS_RESULT = [{
 
 FSYNC_UNLOCK_SUCCESS_RESULT = { "ok" => 1, "info" => "unlock completed" }
 
+IS_MASTER_PRIMARY_RESULT = [{
+  "setName" => "easy-e",
+  "setVersion" => 3,
+  "ismaster" => true,
+  "secondary" => false,
+  "primary" => "slave-mmap=>2700",
+  "me" => "slave-mmap=>2700"
+}]
+
+IS_MASTER_SECONDARY_RESULT = [{
+  "setName" => "easy-e",
+  "setVersion" => 3,
+  "ismaster" => false,
+  "secondary" => true,
+  "primary" => "slave-wt=>2700",
+  "me" => "slave-mmap=>2700",
+  "ok" => 1
+}]
+
 describe EasyE::Plugin::MongoPlugin do
   let(:plugin) { EasyE::Plugin::MongoPlugin.new }
   let(:connection) { spy 'Mongo connection' } 
   let(:connection2) { spy 'Mongo connection #2' } 
 
+  context "on a secondary server" do
+  end
   context "with authentication enabled" do
     before :each do
       plugin.options.user = 'user'
       plugin.options.password = 'password'
-      expect(Mongo::Client).to receive(:new).with("mongodb://localhost:27017", user: 'user', password: 'password').and_return(connection)
+      expect(Mongo::Client).to receive(:new).with(["localhost:27017"], user: 'user', password: 'password').and_return(connection)
       plugin.before
     end
 
@@ -36,15 +57,30 @@ describe EasyE::Plugin::MongoPlugin do
         plugin.options.shutdown = true
       end
 
-      context "on mmapv1" do
-        let(:admin) { spy('admin database') }
-        let(:cmd_sys_unlock) { spy('$cmd.sys.unlock') }
+      context "on a primary server" do
         before :each do
           expect(connection).to receive(:command).twice.with(serverStatus: 1).and_return(MMAP_STATUS)
+          expect(connection).not_to receive(:command).with(fsync: 1, lock: true)
+          expect(connection).to receive(:command).once.with(isMaster: 1).and_return(IS_MASTER_PRIMARY_RESULT)
+          plugin.before
+        end
+
+        after :each do
+          plugin.after
+        end
+
+        subject { connection }
+        it { is_expected.not_to receive(:command).with(fsync: 1, lock: true) }
+      end
+
+      context "on mmapv1" do
+        let(:cmd_sys_unlock) { spy('$cmd.sys.unlock') }
+        before :each do
+          expect(connection).to receive(:command).at_least(1).with(serverStatus: 1).and_return(MMAP_STATUS)
           expect(connection).to receive(:command).once.with(fsync: 1, lock: true).and_return(FSYNC_LOCK_SUCCESS_RESULT)
-          expect(connection).to receive(:[]).with('admin').and_return(admin)
-          expect(admin).to receive(:[]).with('$cmd.sys.unlock').and_return(cmd_sys_unlock)
-          expect(cmd_sys_unlock).to receive(:find_one).once.and_return(FSYNC_UNLOCK_SUCCESS_RESULT)
+          expect(connection).to receive(:command).once.with(isMaster: 1).and_return(IS_MASTER_SECONDARY_RESULT)
+          expect(connection).to receive(:[]).with('$cmd.sys.unlock').and_return(cmd_sys_unlock)
+          expect(cmd_sys_unlock).to receive(:find).once.and_return(FSYNC_UNLOCK_SUCCESS_RESULT)
           expect(connection).not_to receive(:command).with(shutdown: 1)
           plugin.before
         end
@@ -60,6 +96,7 @@ describe EasyE::Plugin::MongoPlugin do
       context "on wired tiger" do
         before :each do
           expect(connection).to receive(:command).with(serverStatus: 1).and_return(WT_STATUS)
+          expect(connection).to receive(:command).once.with(isMaster: 1).and_return(IS_MASTER_SECONDARY_RESULT)
         end
 
         context "and shutdown succeeds" do
