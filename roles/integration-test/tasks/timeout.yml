@@ -1,0 +1,27 @@
+---
+# tasks file for integration-test
+- name: kill netcat
+  shell: pkill nc
+  ignore_errors: true
+
+- name: bind netcat to 2701
+  shell: nohup nc -dkl 2701 &
+  ignore_errors: true
+
+- name: 'run tests against a cluster that always times out'
+  shell: bash -lc './bin/easy-e -a 'dummy' -s 'dummy' -m --mongo --mongo-port 2701 --mongo-shutdown yes --mongo-service mongodb-2700 --mongo-user {{ mongod_user }} --mongo-password {{ mongod_password }}' chdir=/home/{{ ansible_ssh_user }}/easy-e
+  register: test_output
+  ignore_errors: true
+
+- name: 'results (stdout):'
+  debug: var=test_output.stdout_lines
+
+- name: 'results (stderr):'
+  debug: var=test_output.stderr_lines
+
+- name: kill netcat
+  shell: pkill nc
+
+- assert:
+    that: test_output|succeeded
+    that: "ERROR" in test_output.stdout

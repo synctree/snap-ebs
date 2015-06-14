@@ -33,8 +33,6 @@ describe EasyE::Plugin::MongoPlugin do
   let(:connection) { spy 'Mongo connection' } 
   let(:connection2) { spy 'Mongo connection #2' } 
 
-  context "on a secondary server" do
-  end
   context "with authentication enabled" do
     before :each do
       plugin.options.user = 'user'

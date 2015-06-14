@@ -1,0 +1,16 @@
+---
+- name: kill netcat
+  shell: pkill nc
+  ignore_errors: true
+
+- name: kill socat
+  shell: pkill socat
+  ignore_errors: true
+
+- name: ensure mongod is executable
+  shell: chmod +x `which mongod`
+
+- name: ensure mongo is running
+  service: name=mongodb-2700 state=started
+
+- wait_for: port=2700

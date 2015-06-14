@@ -14,12 +14,10 @@
   apt: name={{ item }}
   with_items:
   - libmysqlclient-dev
+  - socat
 
 - name: 'bundle install'
   shell: bash -lc 'bundle install' chdir=/home/{{ ansible_ssh_user }}/easy-e
-
-- name: 'ensure mongo is running'
-  service: name=mongodb-2700 state=started
 
 - name: 'read mongodb password'
   shell: cat /tmp/mongod_password
@@ -30,12 +28,10 @@
   set_fact: mongod_password={{ mongod_password_content.stdout }}
   when: mongod_password is not defined
 
-- name: 'run the tests!'
-  shell: bash -lc './bin/easy-e -a 'dummy' -s 'dummy' -m --mongo --mongo-port 2700 --mongo-shutdown yes --mongo-service mongodb-2700 --mongo-user {{ mongod_user }} --mongo-password {{ mongod_password }}' chdir=/home/{{ ansible_ssh_user }}/easy-e
-  register: test_output
+- include: nominal.yml
 
-- name: 'results (stdout):'
-  debug: var=test_output.stdout_lines
+- include: fail-to-restart.yml
+  when: mongod_storage_engine == 'wiredTiger'
 
-- name: 'results (stderr):'
-  debug: var=test_output.stderr_lines
+- include: report-successful-restart-but-still-unavailable.yml
+  when: mongod_storage_engine == 'wiredTiger'

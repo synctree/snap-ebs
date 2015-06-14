@@ -1,0 +1,34 @@
+---
+- include: prepare-for-test.yml
+
+  # we'll create a fowarder on port 2701, then kill it when the real mongo
+  # process dies. since our test is running against the forwarder, this simulates the case
+  # where the mongo service reports starting but is not actually accessible 
+- name: create a dead-man mongo forwarder
+  shell: socat TCP-LISTEN:2701,fork TCP:localhost:2700
+  async: 60
+  poll: 0
+  ignore_errors: true
+  args:
+    executable: /bin/bash
+
+  # this works because nc will block until mongod closes the connection (when
+  # it is shutdown by easy-e), at which point the pkill line will execute
+- name: kill the forwarder when mongo dies
+  shell: nc -d localhost 2700 ; pkill socat
+  async: 60
+  poll: 0
+  ignore_errors: true
+  args:
+    executable: /bin/bash
+
+- name: 'run against a server that reports a successful restart, then is still unavailable'
+  shell: bash -lc './bin/easy-e -a 'dummy' -s 'dummy' -m --mongo --mongo-port 2701 --mongo-shutdown yes --mongo-service mongodb-2700 --mongo-user {{ mongod_user }} --mongo-password {{ mongod_password }}' chdir=/home/{{ ansible_ssh_user }}/easy-e
+  register: test_output
+  ignore_errors: true
+
+- include: print-results.yml
+
+- assert:
+    that: test_output|succeeded
+    that: '"ERROR" in test_output.stdout'
