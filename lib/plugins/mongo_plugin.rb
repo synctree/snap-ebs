@@ -30,15 +30,20 @@ class EasyE::Plugin::MongoPlugin < EasyE::Plugin
     require 'mongo'
     if wired_tiger?
       logger.info "Wired Tiger storage engine detected"
+      shutdown_mongo and options.shutdown
     else
       logger.info "MMAPv1 storage engine detected"
+      lock_mongo
     end
-
-    shutdown_mongo if wired_tiger? and options.shutdown
   end
 
   def after
-    start_mongo if wired_tiger? and  options.shutdown
+
+    if wired_tiger?
+      start_mongo if options.shutdown
+    else
+      unlock_mongo
+    end
     logger.info "Verifying that mongodb came back up..."
     
     if client.command(serverStatus: 1).first
@@ -77,5 +82,15 @@ class EasyE::Plugin::MongoPlugin < EasyE::Plugin
   def start_mongo
     logger.info "Starting mongodb via 'service #{options[:service]} start'"
     system "service #{options[:service]} start"
+  end
+
+  def lock_mongo
+    logger.info "Locking mongo"
+    client.command(fsync: 1, lock: true)
+  end
+
+  def unlock_mongo
+    logger.info "Unlocking mongo"
+    client.database['$cmd.sys.unlock'].find().first
   end
 end
