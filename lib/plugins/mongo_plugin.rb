@@ -23,7 +23,7 @@ class EasyE::Plugin::MongoPlugin < EasyE::Plugin
   end
 
   def client
-    @client ||= Mongo::Client.new "mongodb://#{options.host}:#{options.port}", user: options.user, password: options.password
+    @client ||= Mongo::Client.new [ "#{options.host}:#{options.port}" ], user: options.user, password: options.password
   end
 
   def before
