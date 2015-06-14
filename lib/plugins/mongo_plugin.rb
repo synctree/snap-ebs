@@ -9,7 +9,11 @@ class EasyE::Plugin::MongoPlugin < EasyE::Plugin
       user: 'Mongo user',
       password: 'Mongo password',
       port: 'Mongo port',
-      host: 'Mongo host'
+      host: 'Mongo host',
+      server_selection_timeout: 'Timeout in seconds while choosing a server to connect to (default 30)',
+      wait_queue_timeout: 'Timeout in seconds while waiting for a connection in the pool (default 1)',
+      connection_timeout: 'Timeout in seconds to wait for a socket to connect (default 5)',
+      socket_timeout: 'Timeout in seconds to wait for an operation to execute on a socket (default 5)'
     }
   end
 
@@ -18,12 +22,27 @@ class EasyE::Plugin::MongoPlugin < EasyE::Plugin
       service: 'mongodb',
       port: '27017',
       shutdown: false,
-      host: 'localhost'
+      host: 'localhost',
+      server_selection_timeout: 30,
+      wait_queue_timeout: 1,
+      connection_timeout: 5,
+      socket_timeout: 5
     }
   end
 
   def client
-    @client ||= Mongo::Client.new [ "#{options.host}:#{options.port}" ], user: options.user, password: options.password
+    @client ||= Mongo::Client.new [ "#{options.host}:#{options.port}" ], client_options
+  end
+
+  def client_options
+    {
+      user: options.user,
+      password: options.password,
+      server_selection_timeout: options.server_selection_timeout,
+      wait_queue_timeout: options.wait_queue_timeout,
+      connection_timeout: options.connection_timeout,
+      socket_timeout: options.socket_timeout,
+    }
   end
 
   def before

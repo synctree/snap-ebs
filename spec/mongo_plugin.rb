@@ -37,7 +37,7 @@ describe EasyE::Plugin::MongoPlugin do
     before :each do
       plugin.options.user = 'user'
       plugin.options.password = 'password'
-      expect(Mongo::Client).to receive(:new).with(["localhost:27017"], user: 'user', password: 'password').and_return(connection)
+      expect(Mongo::Client).to receive(:new).with(["localhost:27017"], user: 'user', password: 'password', server_selection_timeout: 30, wait_queue_timeout: 1, connection_timeout: 5, socket_timeout: 5).and_return(connection)
       plugin.before
     end
 

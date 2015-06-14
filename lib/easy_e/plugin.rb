@@ -27,7 +27,7 @@ class EasyE::Plugin
     end
 
     defined_options.each do |option_name, description|
-      option_parser.on "--#{name.downcase}-#{option_name} #{option_name.upcase}", description do |val|
+      option_parser.on "--#{name.downcase}-#{option_name.to_s.gsub('_','-')} #{option_name.upcase}", description do |val|
         options[option_name.to_sym] = val
       end
     end
