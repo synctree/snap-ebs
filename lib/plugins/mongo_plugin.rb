@@ -38,10 +38,10 @@ class EasyE::Plugin::MongoPlugin < EasyE::Plugin
     {
       user: options.user,
       password: options.password,
-      server_selection_timeout: options.server_selection_timeout,
-      wait_queue_timeout: options.wait_queue_timeout,
-      connection_timeout: options.connection_timeout,
-      socket_timeout: options.socket_timeout,
+      server_selection_timeout: options.server_selection_timeout.to_i,
+      wait_queue_timeout: options.wait_queue_timeout.to_i,
+      connection_timeout: options.connection_timeout.to_i,
+      socket_timeout: options.socket_timeout.to_i
     }
   end
 

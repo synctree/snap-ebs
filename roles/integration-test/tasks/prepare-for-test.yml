@@ -8,7 +8,7 @@
   ignore_errors: true
 
 - name: ensure mongod is executable
-  shell: chmod +x `which mongod`
+  shell: chmod +x /usr/bin/mongod
 
 - name: ensure mongo is running
   service: name=mongodb-2700 state=started
