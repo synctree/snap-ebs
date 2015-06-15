@@ -43,7 +43,7 @@ describe EasyE::Plugin::MongoPlugin do
     subject { plugin }
     it { is_expected.to be}
   end
-  
+
   context "with authentication enabled" do
     before :each do
       plugin.options.user = 'user'
@@ -68,7 +68,6 @@ describe EasyE::Plugin::MongoPlugin do
 
       context "on a primary server" do
         before :each do
-          expect(connection).to receive(:command).twice.with(serverStatus: 1).and_return(MMAP_STATUS)
           expect(connection).not_to receive(:command).with(fsync: 1, lock: true)
           expect(connection).to receive(:command).once.with(isMaster: 1).and_return(IS_MASTER_PRIMARY_RESULT)
           plugin.before
