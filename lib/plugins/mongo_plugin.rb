@@ -47,33 +47,27 @@ class EasyE::Plugin::MongoPlugin < EasyE::Plugin
 
   def before
     require 'mongo'
-    if primary?
-      logger.error "This appears to be a primary member, refusing to touch mongo"
-      return
-    end
+    return logger.error "Refusing to operate" if carefully('check whether this node is a primary') { primary? }.nil?
+    return logger.error "This appears to be a primary member, refusing to touch mongo" if primary?
 
     if wired_tiger?
       logger.info "Wired Tiger storage engine detected"
-      shutdown_mongo and options.shutdown
+      carefully('shutdown mongo') { shutdown_mongo } if options.shutdown
     else
       logger.info "MMAPv1 storage engine detected"
-      lock_mongo
+      carefully('lock mongo') { lock_mongo }
     end
   end
 
   def after
-
     if wired_tiger?
-      start_mongo if options.shutdown
+      carefully('start mongo') { start_mongo } if options.shutdown
     else
-      unlock_mongo
+      carefully('unlock mongo') { unlock_mongo }
     end
-    logger.info "Verifying that mongodb came back up..."
-    
-    if client.command(serverStatus: 1).first
-      logger.info "Received status from mongo, seems to have come back up"
-    else
-      logger.error "Unable to get server status!" unless status
+
+    if carefully('check that mongo is still accessible') { client.command(serverStatus: 1).first }
+      logger.info "Received status from mongo, everything appears to be ok"
     end
   end
 

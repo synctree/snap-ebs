@@ -33,6 +33,17 @@ describe EasyE::Plugin::MongoPlugin do
   let(:connection) { spy 'Mongo connection' } 
   let(:connection2) { spy 'Mongo connection #2' } 
 
+
+  context "when connection times out" do
+    before :each do
+      expect(Mongo::Client).to receive(:new).and_raise(Mongo::Error::NoServerAvailable.new("nobody's home!"))
+      plugin.before
+    end
+
+    subject { plugin }
+    it { is_expected.to be}
+  end
+  
   context "with authentication enabled" do
     before :each do
       plugin.options.user = 'user'

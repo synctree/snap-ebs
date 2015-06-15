@@ -28,8 +28,24 @@ class EasyE
   end
 
   def run
-    plugins.each { |plugin| plugin.before if plugin.options.enable }
+    plugins.each do |plugin|
+      begin
+        plugin.before if plugin.options.enable
+      rescue Exception => e
+        logger.error "Encountered error while running the #{plugin.name} plugin's before hook"
+        logger.error e
+      end
+    end
+
     take_snapshots
-    plugins.each { |plugin| plugin.after if plugin.options.enable }
+
+    plugins.each do |plugin|
+      begin
+        plugin.after if plugin.options.enable
+      rescue Exception => e
+        logger.error "Encountered error while running the #{plugin.name} plugin's after hook"
+        logger.error e
+      end
+    end
   end
 end

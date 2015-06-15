@@ -32,6 +32,14 @@ class EasyE::Plugin
       end
     end
   end
+
+  def carefully msg
+    yield
+  rescue Exception => e
+    logger.error "Error while trying to #{msg}"
+    logger.error e
+    nil
+  end
 end
 
 require 'plugins/mysql_plugin'
