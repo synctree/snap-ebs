@@ -47,6 +47,7 @@ class EasyE::Plugin::MongoPlugin < EasyE::Plugin
 
   def before
     require 'mongo'
+    Mongo::Logger.logger = logger
     return logger.error "Refusing to operate" if carefully('check whether this node is a primary') { primary? }.nil?
     return logger.error "This appears to be a primary member, refusing to operate" if primary?
 
