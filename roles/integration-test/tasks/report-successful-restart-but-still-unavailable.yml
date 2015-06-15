@@ -23,7 +23,7 @@
     executable: /bin/bash
 
 - name: 'run against a server that reports a successful restart, then is still unavailable'
-  shell: bash -lc './bin/easy-e -a 'dummy' -s 'dummy' -m --mongo --mongo-port 2701 --mongo-shutdown yes --mongo-service mongodb-2700 --mongo-user {{ mongod_user }} --mongo-password {{ mongod_password }}' chdir=/home/{{ ansible_ssh_user }}/easy-e
+  shell: bash -lc './bin/easy-e -a 'dummy' -s 'dummy' -m --mongo --mongo-port 2701 --mongo-shutdown yes --mongo-service mongodb-2700 --mongo-user {{ mongod_user }} --mongo-password {{ mongod_password }} --mongo-server-selection-timeout 1 --mongo-connection-timeout 1 --mongo-socket-timeout 1' chdir=/home/{{ ansible_ssh_user }}/easy-e
   register: test_output
   ignore_errors: true
 

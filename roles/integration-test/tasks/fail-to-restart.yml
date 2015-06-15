@@ -14,3 +14,4 @@
 - assert:
     that: test_output|succeeded
     that: '"ERROR" in test_output.stdout'
+    that: '"still accessible" in test_output.stdout'

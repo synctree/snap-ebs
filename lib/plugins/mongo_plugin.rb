@@ -48,7 +48,7 @@ class EasyE::Plugin::MongoPlugin < EasyE::Plugin
   def before
     require 'mongo'
     return logger.error "Refusing to operate" if carefully('check whether this node is a primary') { primary? }.nil?
-    return logger.error "This appears to be a primary member, refusing to touch mongo" if primary?
+    return logger.error "This appears to be a primary member, refusing to operate" if primary?
 
     if wired_tiger?
       logger.info "Wired Tiger storage engine detected"
@@ -60,6 +60,9 @@ class EasyE::Plugin::MongoPlugin < EasyE::Plugin
   end
 
   def after
+    return logger.error "Refusing to operate" if carefully('check whether this node is a primary') { primary? }.nil?
+    return logger.error "This appears to be a primary member, refusing to operate" if primary?
+    
     if wired_tiger?
       carefully('start mongo') { start_mongo } if options.shutdown
     else
