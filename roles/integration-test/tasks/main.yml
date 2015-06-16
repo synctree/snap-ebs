@@ -1,20 +1,19 @@
 ---
 # tasks file for integration-test
-- name: 'Check for Bundler'
-  shell: bash -lc 'which bundler'
-  register: bundler_check
-  ignore_errors: true
-  changed_when: bundler_check|failed
-
-- name: 'Install Bundler'
-  shell: bash -lc 'gem install bundler'
-  when: bundler_check|failed
-
 - name: 'Install needed system libs'
   apt: name={{ item }}
+  when: 
   with_items:
   - libmysqlclient-dev
   - socat
+  when: ansible_os_family == "Debian"
+
+- name: 'Install needed system libs'
+  yum: name={{ item }} state=installed
+  with_items:
+  - mariadb-devel
+  - socat
+  when: ansible_os_family == "RedHat"
 
 - name: 'bundle install'
   shell: bash -lc 'bundle install' chdir=/home/{{ ansible_ssh_user }}/easy-e

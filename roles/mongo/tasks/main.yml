@@ -9,48 +9,36 @@
   apt_key: id=7F0CEB10 url="http://docs.mongodb.org/10gen-gpg-key.asc"
   when: ansible_os_family == "Debian"
 
-- name: Install the python pycurl library
-  apt: name=python-pycurl state=installed update_cache=yes
-  when: ansible_os_family == "Debian"
-
 - name: Install the repository for Ubuntu mongodb
-  apt_repository: repo="{{ mongod_repo_debian }}" state=present
+  apt_repository: repo="deb http://repo.mongodb.org/apt/ubuntu trusty/mongodb-org/3.0 multiverse" state=present
   when: ansible_os_family == "Debian"
 
-- name: Install the libselinux module
-  yum: name=libselinux-python state=installed
+- name: Create the repository for mongodb-org-3.0
+  copy: src=mongodb-org-3.0.repo dest=/etc/yum.repos.d/mongodb-org-3.0.repo
   when: ansible_os_family == "RedHat"
-
-- name: Create the repository for 10Gen
-  copy: src=10gen.repo dest=/etc/yum.repos.d/10gen.repo
-  when: ansible_os_family == "RedHat"
-
-- name: Create the EPEL Repository.
-  copy: src=epel.repo dest=/etc/yum.repos.d/epel.repo
-  when: ansible_os_family == "RedHat"
-
-- name: Create the mongod user
-  user: name={{ mongo_user }} comment="MongoD"
-
-- name: make sure the hostname is available in /etc/hosts
-  lineinfile: dest=/etc/hosts regexp="{{ ansible_hostname }}" line="{{ hostvars[inventory_hostname].ansible_default_ipv4.address + " " + ansible_hostname }}" state=present
-
-- name: Create the data directory for the mongod
-  file: path={{ mongod_datadir_prefix }} owner={{ mongo_user }} group={{ mongo_group }} state=directory
-
-- name: create data directory for mongodb
-  file: path={{ mongod_datadir_prefix }}/mongo-{{ mongod_port }} state=directory owner={{ mongo_user }} group={{ mongo_group }}
-
-- name: Create the mongodb startup file for Rhel
-  template: src=mongod.j2 dest=/etc/init.d/mongod-{{ mongod_port }} mode=0655
-  when: ansible_os_family == "RedHat"
-
-- name: Create the mongodb startup file for Debian
-  template: src=mongod_debian_init.j2 dest=/etc/init/mongodb-{{ mongod_port }}.conf mode=0655
-  when: ansible_os_family == "Debian"
 
 - name: Create the mongodb configuration file
-  template: src=mongod.conf.j2 dest=/etc/mongod-{{ mongod_port }}.conf
+  template: src=mongod.conf.j2 dest=/etc/mongod.conf
+
+- name: Install the mongodb package
+  yum: name={{ item }} state=installed
+  with_items: mongod_pkgs | default(mongod_pkgs_default)
+  register: mongod_install
+  when: ansible_os_family == "RedHat"
+
+- name: Install the mongodb package
+  apt: name={{ item }} state=installed update_cache=yes
+  with_items: mongod_pkgs | default(mongod_pkgs_default)
+  register: mongod_install
+  when: ansible_os_family == "Debian"
+
+- name: Stop the mongodb service for redhat variants
+  command: /etc/init.d/mongod stop
+  when: ansible_os_family == "RedHat" and (mongod_install|changed)
+
+- name: Stop the mongodb service for Ubuntu variants
+  service: name=mongod state=stopped
+  when: ansible_os_family == "Debian" and (mongod_install|changed)
 
 - name: Generate the keyfile for authentication
   set_fact: mongod_secret_key="{{ lookup('password', 'secret length=256 chars=ascii_letters,digits') }}"
@@ -60,34 +48,33 @@
   copy: src=secret dest={{ mongod_datadir_prefix }}/secret owner={{ mongo_user }} group={{ mongo_group }} mode=0400
   when: mongod_use_key
 
-- name: Install the mongodb package
-  yum: name={{ item }} state=installed
-  with_items: mongod_pkgs | default(mongod_pkgs_default)
+- name: Check whether mongod is authorized to run on port {{ mongod_port }}
+  shell: semanage port -l | grep mongo | grep {{ mongod_port }}
   when: ansible_os_family == "RedHat"
+  register: mongod_selinux_port_check
+  ignore_errors: true
 
-- name: Install the mongodb package
-  apt: name={{ item }} state=installed update_cache=yes
-  with_items: mongod_pkgs | default(mongod_pkgs_default)
-  when: ansible_os_family == "Debian"
+- name: Allow the mongodb service to run on redhat
+  shell: semanage port -a -t mongod_port_t -p tcp {{ mongod_port }}
+  when: ansible_os_family == "RedHat" and mongod_selinux_port_check|failed
 
 - name: Start the mongodb service for redhat variants
-  command: creates=/var/lock/subsys/mongod-{{ mongod_port }} /etc/init.d/mongod-{{ mongod_port }} start
+  command: /etc/init.d/mongod start
   when: ansible_os_family == "RedHat"
 
 - name: Start the mongodb service for Ubuntu variants
-  service: name=mongodb-{{ mongod_port }} state=started
+  service: name=mongod state=started
   when: ansible_os_family == "Debian"
 
 - name: Create the file to initialize the mongod replica set
   template: src=repset_init.j2 dest=/tmp/repset_init.js
   when: mongod_replication and (mongod_repl_master == inventory_hostname or mongod_repl_master == ansible_hostname)
 
-- name: Pause for a while
-  pause: seconds=4
-  when: mongod_replication
+- name: wait for mongo
+  wait_for: port={{ mongod_port }}
 
 - name: Initialize the replication set
-  shell: /usr/bin/mongo --port "{{ mongod_port }}" admin /tmp/repset_init.js
+  shell: /usr/bin/mongo --port {{ mongod_port }} admin /tmp/repset_init.js
   when: mongod_replication and (mongod_repl_master == inventory_hostname or mongod_repl_master == ansible_hostname)
 
 - name: Generate the password for authentication
@@ -118,7 +105,7 @@
   changed_when: false
 
 - name: Create the initial user
-  shell: /usr/bin/mongo --port "{{ mongod_port }}" admin /tmp/create_user.js
+  shell: /usr/bin/mongo --port {{ mongod_port }} admin /tmp/create_user.js
   when: mongod_user != false and (mongod_user_check | failed) and ((not mongod_replication) or (mongod_repl_master == inventory_hostname or mongod_repl_master == ansible_hostname))
 
 - name: Create the file to add additional RS members
@@ -126,5 +113,5 @@
   when: mongod_user != false and (mongod_user_check | failed) and ((not mongod_replication) or (mongod_repl_master == inventory_hostname or mongod_repl_master == ansible_hostname))
 
 - name: Add members to RS
-  shell: /usr/bin/mongo --port "{{ mongod_port }}" {{ mongod_user_login_flags }} admin /tmp/add_members.js
+  shell: /usr/bin/mongo --port {{ mongod_port }} {{ mongod_user_login_flags }} admin /tmp/add_members.js
   when: mongod_replication and (mongod_repl_master == inventory_hostname or mongod_repl_master == ansible_hostname)

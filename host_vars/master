@@ -1,2 +1,6 @@
 ---
 mongod_storage_engine: mmapv1
+mongod_pkgs:
+  - python-selinux
+  - mongodb-org
+  - python-pymongo

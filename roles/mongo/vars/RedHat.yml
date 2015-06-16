@@ -1,10 +1,8 @@
 ---
-mongod_pkgs_default:
-   - mongo-10gen
-   - mongo-10gen-server
+mongod_pkgs:
+   - mongodb-org
    - bc
-   - python-pip
-   - pymongo
-
+   - policycoreutils-python
 mongo_user: mongod
 mongo_group: mongod
+mongod_datadir_prefix: /var/lib/mongo/

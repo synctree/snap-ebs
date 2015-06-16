@@ -1,5 +1,5 @@
 {% for host in mongod_repl_servers %}
-rs.add("{{ host }}:{{ mongod_port }}")
+rs.add({ host: "{{ host }}:{{ mongod_port }}", priority: 0.5})
 sleep(8000)
 {% endfor %}
 printjson(rs.status())

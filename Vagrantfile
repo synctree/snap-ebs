@@ -25,7 +25,7 @@ Vagrant.configure(VAGRANT_FILE_API_VERSION) do |config|
 
   # the mongodb slave server using wired tiger
   config.vm.define 'slave-wt' do |s|
-    s.vm.box       = 'ubuntu/trusty64'
+    s.vm.box       = 'chef/centos-7.0'
     s.vm.host_name = 'slave-wt'
     s.vm.network 'private_network', ip: "192.168.10.3"
   end

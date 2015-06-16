@@ -11,6 +11,6 @@
   shell: chmod +x /usr/bin/mongod
 
 - name: ensure mongo is running
-  service: name=mongodb-2700 state=started
+  service: name=mongod state=started
 
-- wait_for: port=2700
+- wait_for: port={{ mongod_port }}

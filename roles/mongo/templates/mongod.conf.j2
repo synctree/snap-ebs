@@ -4,37 +4,34 @@ storageEngine={{ mongod_storage_engine }}
 
 #where to log
 {% if ansible_os_family == "RedHat" %}
-logpath=/var/log/mongo/mongod-{{ mongod_port }}.log
+pidfilepath=/var/run/mongodb/mongod.pid
+logpath=/var/log/mongodb/mongod.log
 # fork and run in background
 fork = true
 {% endif %}
 {% if ansible_os_family == "Debian" %}
-logpath=/var/log/mongodb/mongod-{{ mongod_port }}.log
+logpath=/var/log/mongodb/mongod.log
+pidfilepath=/var/run/mongodb.pid
 # fork and run in background
 fork = false
 {% endif %}
 
 logappend=true
 
-
 port = {{ mongod_port }}
 
-dbpath={{ mongod_datadir_prefix }}/mongo-{{ mongod_port }}
+dbpath={{ mongod_datadir_prefix }}
 
 {% if mongod_use_key %}
 keyFile={{ mongod_datadir_prefix }}/secret
 {% endif %}
-
-# location of pidfile
-pidfilepath = {{ mongod_datadir_prefix }}/mongod_{{ mongod_port }}.pid
-
 
 # Ping interval for Mongo monitoring server.
 #mms-interval = <seconds>
 
 # Replication Options
 {% if mongod_replication %}
-replSet={{ mongod_replset_name | default(mongod_port) }}
+replSet={{ mongod_replset_name | default("rs0") }}
 {% endif %}
 
 bind_ip={{ mongod_bind_ip }}
