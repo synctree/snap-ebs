@@ -1,3 +1,7 @@
 ---
 mongod_storage_engine: wiredTiger
-mongod_replication: true
+mysql_server_id: "3"
+mysql_replication_role: 'slave'
+mysql_packages:
+  - mariadb
+  - mariadb-server

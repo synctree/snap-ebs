@@ -4,4 +4,6 @@ mongod_pkgs:
   - python-selinux
   - mongodb-org
   - python-pymongo
-mongod_replication: true
+
+mysql_server_id: "1"
+mysql_replication_role: 'master'

@@ -1,3 +1,4 @@
 ---
 mongod_storage_engine: mmapv1
-mongod_replication: true
+mysql_server_id: "2"
+mysql_replication_role: 'slave'
