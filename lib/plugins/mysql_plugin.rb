@@ -1,6 +1,7 @@
 class SnapEbs::Plugin::MysqlPlugin < SnapEbs::Plugin
   def defined_options
     {
+      shutdown: 'MySQL will only be shut down when this is set to "yes"',
       username: 'MySQL Username',
       password: 'MySQL Password',
       port: 'MySQL port',
@@ -10,6 +11,7 @@ class SnapEbs::Plugin::MysqlPlugin < SnapEbs::Plugin
 
   def default_options
     {
+      shutdown: 'no',
       username: 'root',
       password: nil,
       port: 3306,
@@ -20,9 +22,12 @@ class SnapEbs::Plugin::MysqlPlugin < SnapEbs::Plugin
   def before
     require 'mysql2'
     return logger.error "This appears to be a master in a replication set. Refusing to operate." if master?
+    stop_mysql
   end
 
   def after
+    return logger.error "This appears to be a master in a replication set. Refusing to operate." if master?
+    start_mysql
   end
 
   def name
@@ -36,6 +41,10 @@ class SnapEbs::Plugin::MysqlPlugin < SnapEbs::Plugin
   private
 
   def slave?
+    if @slave == nil
+      @slave = logger.debug client.query("SHOW SLAVE STATUS").to_a.any?
+    end
+    @slave 
   end
 
   # > If you see no Binlog Dump threads on a master server, this means that
@@ -53,5 +62,9 @@ class SnapEbs::Plugin::MysqlPlugin < SnapEbs::Plugin
 
   def stop_mysql
     system("service mysql stop")
+  end
+
+  def start_mysql
+    system("service mysql start")
   end
 end
