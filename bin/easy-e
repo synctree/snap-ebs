@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby
-require './lib/easy_e.rb'
+$:.unshift File.join File.dirname(__FILE__), '..'
+require 'lib/easy_e.rb'
 
 EasyE.new.execute
