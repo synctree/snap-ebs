@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = 'easy_e'
-  s.version     = '0.0.2'
+  s.version     = '0.0.3'
   s.date        = '2015-04-21'
   s.summary     = "Easy EBS snapshots that work"
   s.description = "Easy EBS snapshots that work"
@@ -11,4 +11,8 @@ Gem::Specification.new do |s|
   s.homepage    = 'http://rubygems.org/gems/easy_e'
   s.license     = 'MIT'
   s.require_path = 'lib'
+  s.add_runtime_dependency "fog"
+  s.add_runtime_dependency "httparty"
+  s.add_runtime_dependency "mysql"
+  s.add_runtime_dependency "mongo"
 end
