@@ -1,9 +1,6 @@
+$:.unshift File.dirname __FILE__
 require 'logger'
 require 'ostruct'
-
-class EasyE
-end
-
 require 'easy_e/options'
 require 'easy_e/snapshotter'
 require 'easy_e/plugin'
@@ -12,15 +9,21 @@ class EasyE
   include EasyE::Options
   include EasyE::Snapshotter
 
-  attr_accessor :logger, :options
-  def initialize(logger = false)
-    @options = OpenStruct.new
-    @logger = (logger or Logger.new(false))
-    @logger.debug "Debug logging enabled"
+  @@logger = nil
+  def self.logger logfile
+    unless @@logger
+      @@logger = Logger.new(logfile || STDOUT)
+      @@logger.level = Logger::DEBUG
+      @@logger.formatter = proc do |severity, datetime, progname, msg|
+        "[#{severity}] #{datetime.strftime("%Y-%m-%d %H:%M:%S")} #{msg}\n"
+      end
+    end
+
+    @@logger
   end
 
   def plugins
-    @plugins ||= registered_plugins.collect { |klass| klass.new logger }
+    @plugins ||= registered_plugins.collect { |klass| klass.new }
   end
 
   def registered_plugins
@@ -47,5 +50,16 @@ class EasyE
         logger.error e
       end
     end
+  end
+
+  def execute
+    option_parser.parse!
+    logger.debug "Debug logging enabled"
+    run
+  end
+
+  def logger
+    # HACK -- the logfile argument only gets used on the first invocation
+    EasyE.logger options.logfile
   end
 end

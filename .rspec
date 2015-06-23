@@ -1,0 +1,1 @@
+spec/*.rb -r ./lib/easy_e

@@ -12,13 +12,16 @@ class EasyE::Plugin
     @@registered_plugins
   end
 
-  def initialize logger = false
-    @logger = (logger or Logger.new(false))
-    @options = OpenStruct.new default_options
-  end
-
   def default_options
     { }
+  end
+
+  def options
+    @options ||= OpenStruct.new default_options
+  end
+
+  def logger
+    EasyE.logger false
   end
 
   def collect_options option_parser

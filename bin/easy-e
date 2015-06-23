@@ -1,15 +1,4 @@
 #!/usr/bin/env ruby
-$:.unshift(File.join(File.dirname(__FILE__), "/../lib"))
-require 'optparse'
-require 'logger'
-require 'easy_e'
+require './lib/easy_e.rb'
 
-logger = Logger.new(STDOUT)
-logger.level = Logger::DEBUG
-logger.formatter = proc do |severity, datetime, progname, msg|
-  "[#{severity}] #{datetime.strftime("%Y-%m-%d %H:%M:%S")} #{msg}\n"
-end
-
-easy_e = EasyE.new logger
-easy_e.option_parser.parse!
-easy_e.run
+EasyE.new.execute
