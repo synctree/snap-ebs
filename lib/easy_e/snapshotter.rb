@@ -68,7 +68,7 @@ module EasyE::Snapshotter
   end
 
   def should_snap vol
-    normalized_device = vol.device.gsub('/dev/xv', '/dev/s') rescue vol.device
+    normalized_device = vol.device.gsub('/dev/s', '/dev/xv') rescue vol.device
     options.directory.nil? or devices_to_snap.include?(normalized_device)
   end
 
