@@ -57,7 +57,6 @@ module EasyE::Snapshotter
   end
 
   def snapshot_name vol
-    logger.debug vol.pretty_inspect
     "#{Time.now.strftime "%Y%m%d%H%M%S"}-#{instance_name}-#{vol.device}"
   end
 end
