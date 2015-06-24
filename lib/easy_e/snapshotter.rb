@@ -5,6 +5,7 @@ module EasyE::Snapshotter
 
   def take_snapshots
     attached_volumes.collect do |vol|
+      next unless should_snap vol
       logger.debug "Snapping #{vol.id}"
       snapshot = compute.snapshots.new
       snapshot.volume_id = vol.id
@@ -64,5 +65,15 @@ module EasyE::Snapshotter
     id = instance_name
     id = instance_id if id.nil? or id.empty?
     "#{Time.now.strftime "%Y%m%d%H%M%S"}-#{id}-#{vol.device}"
+  end
+
+  def should_snap vol
+    options.directory.nil? or devices_to_snap.include?(vol.device)
+  end
+
+  def devices_to_snap
+    @devices_to_snap ||= options.directory.split(',').map { |dir| `df --output=source #{dir} | grep dev`.strip }
+    logger.debug @devices_to_snap
+    @devices_to_snap
   end
 end

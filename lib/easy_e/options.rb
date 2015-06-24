@@ -31,6 +31,10 @@ class EasyE
             options.logfile = filename
             logger.debug filename
           end
+
+          o.on("-d", "--directory PATH", "Only snap volumes mounted to PATH, a comma-separated list of directories") do |d|
+            options.directory = d
+          end
         end
 
         plugins.each { |plugin| plugin.collect_options @option_parser }
