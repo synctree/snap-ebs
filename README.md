@@ -18,6 +18,21 @@ Some specific goals and how they are achieved:
 
 Install
 ===
+
+Dependencies - Amazon Linux
+---
+
+```
+sudo yum install build-essential \
+                 gcc \
+                 glibc-devel \
+                 make \
+                 mysql-devel \
+                 ruby-devel \
+                 patch \
+                 zlib-devel
+```
+
 ```
 gem install easy-ec2-ebs-automatic-consistent-snapshot
 crontab -e
