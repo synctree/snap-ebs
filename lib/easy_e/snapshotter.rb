@@ -1,10 +1,8 @@
 require 'csv'
 require 'httparty'
-require 'pp'
 module EasyE::Snapshotter
   AWS_INSTANCE_ID_URL = 'http://169.254.169.254/latest/dynamic/instance-identity/document'
 
-  attr_writer :storage, :compute, :instance_id
   def take_snapshots
     attached_volumes.collect do |vol|
       logger.debug "Snapping #{vol.id}"
@@ -19,7 +17,13 @@ module EasyE::Snapshotter
   # lazy loaders
   def compute
     require 'fog/aws'
-    Fog.mock! if options[:mock]
+    if options[:mock]
+      Fog.mock!
+      @region = 'us-east-1'
+      @instance_id = 'i-deadbeef'
+      @instance_name = 'totally-not-the-cia'
+    end
+
     @compute ||= Fog::Compute.new({
       :aws_access_key_id => access_key,
       :aws_secret_access_key => secret_key,
@@ -57,6 +61,8 @@ module EasyE::Snapshotter
   end
 
   def snapshot_name vol
-    "#{Time.now.strftime "%Y%m%d%H%M%S"}-#{instance_name}-#{vol.device}"
+    id = instance_name
+    id = instance_id if id.nil? or id.empty?
+    "#{Time.now.strftime "%Y%m%d%H%M%S"}-#{id}-#{vol.device}"
   end
 end
