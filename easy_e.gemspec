@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = 'easy_e'
-  s.version     = '0.0.3'
+  s.version     = '0.0.4'
   s.date        = '2015-04-21'
   s.summary     = "Easy EBS snapshots that work"
   s.description = "Easy EBS snapshots that work"
