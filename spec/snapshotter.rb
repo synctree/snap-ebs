@@ -30,8 +30,8 @@ describe EasyE::Snapshotter do
       expect(HTTParty).to receive(:get).at_least(:once).with(EasyE::Snapshotter::AWS_INSTANCE_ID_URL) { AWS_INSTANCE_ID_URL_RESPONSE }
 
       # mock volume list
-      expect(attachedVolume1).to receive_messages(server_id: "i-7a12445a", volume_id: "vol-00000001")
-      expect(attachedVolume2).to receive_messages(server_id: "i-7a12445a", volume_id: "vol-00000002")
+      expect(attachedVolume1).to receive_messages(server_id: "i-7a12445a", id: "vol-00000001")
+      expect(attachedVolume2).to receive_messages(server_id: "i-7a12445a", id: "vol-00000002")
       expect(detachedVolume1).to receive_messages(server_id: "i-deadbeef")
       expect(easy_e.compute).to receive(:volumes).at_least(:once) do
         [ attachedVolume1, attachedVolume2, detachedVolume1 ]
