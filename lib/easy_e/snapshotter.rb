@@ -7,9 +7,10 @@ module EasyE::Snapshotter
   attr_writer :storage, :compute, :instance_id
   def take_snapshots
     attached_volumes.collect do |vol|
-      logger.debug "Snapping #{vol.volume_id}"
+      logger.debug "Snapping #{vol.id}"
       snapshot = compute.snapshots.new
-      snapshot.volume_id = vol.volume_id
+      snapshot.volume_id = vol.id
+      snapshot.description = snapshot_name(vol)
       snapshot.save
       snapshot
     end
@@ -22,6 +23,7 @@ module EasyE::Snapshotter
     @compute ||= Fog::Compute.new({
       :aws_access_key_id => access_key,
       :aws_secret_access_key => secret_key,
+      :region => region,
       :provider => "AWS"
     }) 
   end
@@ -44,5 +46,18 @@ module EasyE::Snapshotter
 
   def instance_id
     @instance_id ||= JSON.parse(HTTParty.get(AWS_INSTANCE_ID_URL))["instanceId"]
+  end
+
+  def instance_name
+    @instance_name ||= compute.servers.get(instance_id).tags['Name']
+  end
+
+  def region
+    @region ||= JSON.parse(HTTParty.get(AWS_INSTANCE_ID_URL))["region"]
+  end
+
+  def snapshot_name vol
+    logger.debug vol.pretty_inspect
+    "#{Time.now.strftime "%Y%m%d%H%M%S"}-#{instance_name}-#{vol.device}"
   end
 end
