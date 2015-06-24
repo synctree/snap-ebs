@@ -1,2 +1,3 @@
 ---
 mongod_storage_engine: wiredTiger
+mongod_replication: true

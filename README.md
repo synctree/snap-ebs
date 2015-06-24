@@ -23,13 +23,12 @@ Dependencies - Amazon Linux
 ---
 
 ```
-sudo yum install build-essential \
-                 gcc \
+sudo yum install gcc \
                  glibc-devel \
                  make \
                  mysql-devel \
-                 ruby-devel \
                  patch \
+                 ruby-devel \
                  zlib-devel
 ```
 

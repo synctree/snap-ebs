@@ -5,6 +5,8 @@
 - name: Add the OS specific varibles
   include_vars: "{{ ansible_os_family }}.yml"
 
+- debug: var=mongod_replication
+
 - name: Install the apt key for ubuntu
   apt_key: id=7F0CEB10 url="http://docs.mongodb.org/10gen-gpg-key.asc"
   when: ansible_os_family == "Debian"
@@ -27,7 +29,7 @@
   when: ansible_os_family == "RedHat"
 
 - name: Install the mongodb package
-  apt: name={{ item }} state=installed update_cache=yes
+  apt: name={{ item }} state=installed
   with_items: mongod_pkgs | default(mongod_pkgs_default)
   register: mongod_install
   when: ansible_os_family == "Debian"
@@ -89,16 +91,22 @@
   set_fact: mongod_user_login_flags=""
   when: mongod_user == false
 
+- name: Determine whether this is a master node
+  set_fact: i_am_master="{{ (mongod_repl_master == inventory_hostname) or (mongod_repl_master == ansible_hostname) }}"
+
 - name: Check if mongo user exists
   shell: /usr/bin/mongo --port {{ mongod_port }} {{ mongod_user_login_flags }} --eval 'db.serverStatus()' admin
   register: mongod_user_check
-  when: mongod_user != false and ((not mongod_replication) or (mongod_repl_master == inventory_hostname or mongod_repl_master == ansible_hostname))
+  when: mongod_user != false
   ignore_errors: true
   changed_when: false
 
+- name: Determine whether the user needs to be created
+  set_fact: should_create_user="{{ mongod_user != false and (mongod_user_check | failed) and ((not mongod_replication) or i_am_master) }}"
+
 - name: Create the file to create the initial user
   template: src=create_user.j2 dest=/tmp/create_user.js
-  when: mongod_user != false and (mongod_user_check | failed) and ((not mongod_replication) or (mongod_repl_master == inventory_hostname or mongod_repl_master == ansible_hostname))
+  when: should_create_user 
 
 - name: Create the password file for future reference
   shell: echo "{{ mongod_password }}" > /tmp/mongod_password
@@ -106,12 +114,12 @@
 
 - name: Create the initial user
   shell: /usr/bin/mongo --port {{ mongod_port }} admin /tmp/create_user.js
-  when: mongod_user != false and (mongod_user_check | failed) and ((not mongod_replication) or (mongod_repl_master == inventory_hostname or mongod_repl_master == ansible_hostname))
+  when: should_create_user 
 
 - name: Create the file to add additional RS members
   template: src=add_members.j2 dest=/tmp/add_members.js
-  when: mongod_user != false and (mongod_user_check | failed) and ((not mongod_replication) or (mongod_repl_master == inventory_hostname or mongod_repl_master == ansible_hostname))
+  when: mongod_replication and i_am_master
 
 - name: Add members to RS
   shell: /usr/bin/mongo --port {{ mongod_port }} {{ mongod_user_login_flags }} admin /tmp/add_members.js
-  when: mongod_replication and (mongod_repl_master == inventory_hostname or mongod_repl_master == ansible_hostname)
+  when: mongod_replication and i_am_master

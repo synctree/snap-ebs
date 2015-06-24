@@ -30,7 +30,7 @@
 - include: nominal.yml
 
 - include: fail-to-restart.yml
-  when: mongod_storage_engine == 'wiredTiger'
+  when: mongod_storage_engine == 'wiredTiger' and mongod_replication
 
 - include: report-successful-restart-but-still-unavailable.yml
-  when: mongod_storage_engine == 'wiredTiger'
+  when: mongod_storage_engine == 'wiredTiger' and mongod_replication
