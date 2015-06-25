@@ -5,8 +5,8 @@
   shell: bash -lc './bin/easy-e -a 'dummy' -s 'dummy' -m --mongo --mongo-port {{ mongod_port }} --mongo-shutdown yes --mongo-service mongod --mongo-user mongod --mongo-password {{ mongod_password }}' chdir=/home/{{ ansible_ssh_user }}/easy-e
   register: test_output
 
+- include: print-results.yml
+
 - assert:
     that: test_output|succeeded
     that: '"ERROR" not in test_output.stdout'
-
-- include: print-results.yml
