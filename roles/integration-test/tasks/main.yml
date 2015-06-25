@@ -8,6 +8,9 @@
   - socat
   when: ansible_os_family == "Debian"
 
+- name: Determine whether this is a master node
+  set_fact: i_am_master="{{ (mongod_repl_master == inventory_hostname) or (mongod_repl_master == ansible_hostname) }}"
+
 - name: 'Install needed system libs'
   yum: name={{ item }} state=installed
   with_items:
@@ -30,7 +33,7 @@
 - include: nominal.yml
 
 - include: fail-to-restart.yml
-  when: mongod_storage_engine == 'wiredTiger' and mongod_replication
+  when: mongod_storage_engine == 'wiredTiger'
 
 - include: report-successful-restart-but-still-unavailable.yml
-  when: mongod_storage_engine == 'wiredTiger' and mongod_replication
+  when: mongod_storage_engine == 'wiredTiger'

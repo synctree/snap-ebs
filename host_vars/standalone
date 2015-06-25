@@ -1,5 +1,5 @@
 ---
-mongod_storage_engine: mmapv1
+mongod_storage_engine: wiredTiger
 mongod_replication: false
 mongod_repl_servers: false
 mongod_repl_master: false

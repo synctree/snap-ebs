@@ -4,9 +4,16 @@
 - name: 'run against a setup in nominal condition'
   shell: bash -lc './bin/easy-e -a 'dummy' -s 'dummy' -m --mongo --mongo-port {{ mongod_port }} --mongo-shutdown yes --mongo-service mongod --mongo-user mongod --mongo-password {{ mongod_password }}' chdir=/home/{{ ansible_ssh_user }}/easy-e
   register: test_output
+  async: 10
+  poll: 5
 
 - include: print-results.yml
 
 - assert:
-    that: test_output|succeeded
     that: '"ERROR" not in test_output.stdout'
+  when: not i_am_master
+
+- assert:
+    that: '"ERROR" in test_output.stdout'
+    that: '"appears to be a primary member" in test_output.stdout'
+  when: i_am_master

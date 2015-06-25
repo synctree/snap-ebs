@@ -52,7 +52,6 @@ Vagrant.configure(VAGRANT_FILE_API_VERSION) do |config|
         "standalone" => [ "standalone" ]
       }
 
-      ansible.verbose = 'vv'
       ansible.playbook = 'playbook.yml'
       ansible.limit = 'all'
     end
