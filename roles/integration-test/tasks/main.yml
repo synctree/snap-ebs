@@ -19,7 +19,7 @@
   when: ansible_os_family == "RedHat"
 
 - name: 'bundle install'
-  shell: bash -lc 'bundle install' chdir=/home/{{ ansible_ssh_user }}/easy-e
+  shell: bash -lc 'bundle install' chdir=/home/{{ ansible_ssh_user }}/snap-ebs
 
 - name: 'read mongodb password'
   shell: cat /tmp/mongod_password

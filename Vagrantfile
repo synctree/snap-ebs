@@ -9,12 +9,12 @@ Vagrant.configure(VAGRANT_FILE_API_VERSION) do |config|
 
   # mount the source directories for rapid iteration
   [ 'lib/', 'bin/' ].each do |folder|
-    config.vm.synced_folder "./#{folder}", "/home/vagrant/easy-e/#{folder}", owner: 'vagrant'
+    config.vm.synced_folder "./#{folder}", "/home/vagrant/snap-ebs/#{folder}", owner: 'vagrant'
   end
 
   # mount the gemfile as well
-  config.vm.provision 'shell', inline: 'chown vagrant:vagrant -R /home/vagrant/easy-e'
-  config.vm.provision 'file', source: './Gemfile', destination: '/home/vagrant/easy-e/Gemfile'
+  config.vm.provision 'shell', inline: 'chown vagrant:vagrant -R /home/vagrant/snap-ebs'
+  config.vm.provision 'file', source: './Gemfile', destination: '/home/vagrant/snap-ebs/Gemfile'
 
   # the mongodb master server
   config.vm.define 'master' do |s|

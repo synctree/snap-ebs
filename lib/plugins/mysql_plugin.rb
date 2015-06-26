@@ -1,4 +1,4 @@
-class EasyE::Plugin::MysqlPlugin < EasyE::Plugin
+class SnapEbs::Plugin::MysqlPlugin < SnapEbs::Plugin
   def defined_options
     {
       user: 'MySql Username',

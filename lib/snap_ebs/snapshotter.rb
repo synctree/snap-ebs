@@ -1,6 +1,6 @@
 require 'csv'
 require 'httparty'
-module EasyE::Snapshotter
+module SnapEbs::Snapshotter
   AWS_INSTANCE_ID_URL = 'http://169.254.169.254/latest/dynamic/instance-identity/document'
 
   def take_snapshots

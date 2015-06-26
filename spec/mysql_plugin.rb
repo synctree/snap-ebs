@@ -1,6 +1,6 @@
 require 'mysql'
-describe EasyE::Plugin::MysqlPlugin do
-  let(:plugin) { EasyE::Plugin::MysqlPlugin.new }
+describe SnapEbs::Plugin::MysqlPlugin do
+  let(:plugin) { SnapEbs::Plugin::MysqlPlugin.new }
   let(:connection) { spy 'Mysql connection' } 
 
   context "ideally" do

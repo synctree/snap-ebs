@@ -1,13 +1,13 @@
 $:.unshift File.dirname __FILE__
 require 'logger'
 require 'ostruct'
-require 'easy_e/options'
-require 'easy_e/snapshotter'
-require 'easy_e/plugin'
+require 'snap_ebs/options'
+require 'snap_ebs/snapshotter'
+require 'snap_ebs/plugin'
 
-class EasyE
-  include EasyE::Options
-  include EasyE::Snapshotter
+class SnapEbs
+  include SnapEbs::Options
+  include SnapEbs::Snapshotter
 
   @@logger = nil
   def self.logger logfile
@@ -27,7 +27,7 @@ class EasyE
   end
 
   def registered_plugins
-    EasyE::Plugin.registered_plugins
+    SnapEbs::Plugin.registered_plugins
   end
 
   def run
@@ -60,6 +60,6 @@ class EasyE
 
   def logger
     # HACK -- the logfile argument only gets used on the first invocation
-    EasyE.logger options.logfile
+    SnapEbs.logger options.logfile
   end
 end

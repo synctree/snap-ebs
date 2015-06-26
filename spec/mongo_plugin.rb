@@ -1,5 +1,5 @@
 require 'mongo'
-WT_STATUS = [{ "#{EasyE::Plugin::MongoPlugin::WIRED_TIGER_KEY}" => { } }]
+WT_STATUS = [{ "#{SnapEbs::Plugin::MongoPlugin::WIRED_TIGER_KEY}" => { } }]
 MMAP_STATUS = [{ }]
 FSYNC_LOCK_SUCCESS_RESULT = [{
   "info" => "now locked against writes, use db.fsyncUnlock() to unlock",
@@ -10,7 +10,7 @@ FSYNC_LOCK_SUCCESS_RESULT = [{
 FSYNC_UNLOCK_SUCCESS_RESULT = { "ok" => 1, "info" => "unlock completed" }
 
 IS_MASTER_PRIMARY_RESULT = [{
-  "setName" => "easy-e",
+  "setName" => "snap-ebs",
   "setVersion" => 3,
   "ismaster" => true,
   "secondary" => false,
@@ -19,7 +19,7 @@ IS_MASTER_PRIMARY_RESULT = [{
 }]
 
 IS_MASTER_SECONDARY_RESULT = [{
-  "setName" => "easy-e",
+  "setName" => "snap-ebs",
   "setVersion" => 3,
   "ismaster" => false,
   "secondary" => true,
@@ -28,8 +28,8 @@ IS_MASTER_SECONDARY_RESULT = [{
   "ok" => 1
 }]
 
-describe EasyE::Plugin::MongoPlugin do
-  let(:plugin) { EasyE::Plugin::MongoPlugin.new }
+describe SnapEbs::Plugin::MongoPlugin do
+  let(:plugin) { SnapEbs::Plugin::MongoPlugin.new }
   let(:connection) { spy 'Mongo connection' } 
   let(:connection2) { spy 'Mongo connection #2' } 
 

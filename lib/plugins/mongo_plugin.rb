@@ -1,5 +1,5 @@
 require 'pp'
-class EasyE::Plugin::MongoPlugin < EasyE::Plugin
+class SnapEbs::Plugin::MongoPlugin < SnapEbs::Plugin
   WIRED_TIGER_KEY = 'wiredTiger'
   attr_accessor :client
   def defined_options

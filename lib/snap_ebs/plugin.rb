@@ -1,5 +1,5 @@
 require 'ostruct'
-class EasyE::Plugin
+class SnapEbs::Plugin
   @@registered_plugins = []
 
   attr_reader :options, :logger
@@ -21,7 +21,7 @@ class EasyE::Plugin
   end
 
   def logger
-    EasyE.logger false
+    SnapEbs.logger false
   end
 
   def collect_options option_parser

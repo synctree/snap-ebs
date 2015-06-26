@@ -5,7 +5,7 @@
   shell: chmod -x `which mongod`
 
 - name: 'run against a server that fails to restart'
-  shell: bash -lc './bin/easy-e -a 'dummy' -s 'dummy' -m --mongo --mongo-port {{ mongod_port }} --mongo-shutdown yes --mongo-service mongodb-2700 --mongo-user {{ mongod_user }} --mongo-password {{ mongod_password }} --mongo-server-selection-timeout 1 --mongo-connection-timeout 1 --mongo-socket-timeout 1 ' chdir=/home/{{ ansible_ssh_user }}/easy-e
+  shell: bash -lc './bin/snap-ebs -a 'dummy' -s 'dummy' -m --mongo --mongo-port {{ mongod_port }} --mongo-shutdown yes --mongo-service mongodb-2700 --mongo-user {{ mongod_user }} --mongo-password {{ mongod_password }} --mongo-server-selection-timeout 1 --mongo-connection-timeout 1 --mongo-socket-timeout 1 ' chdir=/home/{{ ansible_ssh_user }}/snap-ebs
   register: test_output
   ignore_errors: true
   async: 60

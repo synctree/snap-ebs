@@ -1,6 +1,6 @@
 require 'optparse'
 
-class EasyE
+class SnapEbs
   module Options
     def option_parser
       unless @option_parser

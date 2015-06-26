@@ -1,5 +1,5 @@
 Gem::Specification.new do |s|
-  s.name        = 'easy_e'
+  s.name        = 'snap-ebs'
   s.version     = '0.0.7'
   s.date        = '2015-06-24'
   s.summary     = "Easy EBS snapshots that work"
@@ -7,8 +7,8 @@ Gem::Specification.new do |s|
   s.authors     = ["Bryan Conrad"]
   s.email       = 'bryan.conrad@synctree.com'
   s.files       = Dir["{lib}/**/*.rb", "bin/*", "*.md"]
-  s.executables << 'easy-e'
-  s.homepage    = 'http://rubygems.org/gems/easy_e'
+  s.executables << 'snap-ebs'
+  s.homepage    = 'http://rubygems.org/gems/snap-ebs'
   s.license     = 'MIT'
   s.require_path = 'lib'
   s.add_runtime_dependency "fog"

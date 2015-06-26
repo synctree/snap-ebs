@@ -1,1 +1,1 @@
-spec/*.rb -r ./lib/easy_e
+spec/*.rb -r ./lib/snap_ebs

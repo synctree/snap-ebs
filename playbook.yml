@@ -15,7 +15,7 @@
     mongod_port: 27017
     mongod_repl_servers: ["master", "slave-wt", "slave-mmap"]
     mongod_repl_master: "master"
-    mongod_replset_name: easy-e
+    mongod_replset_name: snap-ebs
     mongod_user: mongod
     mongod_bind_ip: 0.0.0.0
 

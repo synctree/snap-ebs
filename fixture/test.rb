@@ -1,4 +1,4 @@
-class EasyE::Plugin::Test < EasyE::Plugin
+class SnapEbs::Plugin::Test < SnapEbs::Plugin
   def defined_options
     { option: 'test option' }
   end

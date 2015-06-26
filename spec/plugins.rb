@@ -1,34 +1,34 @@
 require './fixture/test'
-describe EasyE::Plugin do
-  let(:easy_e) { EasyE.new }
-  let(:test_plugin) { EasyE::Plugin::Test.new }
+describe SnapEbs::Plugin do
+  let(:snap_ebs) { SnapEbs.new }
+  let(:test_plugin) { SnapEbs::Plugin::Test.new }
 
   context "all registered plugins" do
-    subject { easy_e.registered_plugins }
+    subject { snap_ebs.registered_plugins }
     it { is_expected.to be_an Array }
-    it { is_expected.to include EasyE::Plugin::Test }
+    it { is_expected.to include SnapEbs::Plugin::Test }
   end
 
   context "all loaded plugins" do
     before do
-      expect(EasyE::Plugin::Test).to receive(:new).and_call_original
+      expect(SnapEbs::Plugin::Test).to receive(:new).and_call_original
     end
 
-    subject { easy_e.plugins }
+    subject { snap_ebs.plugins }
     it { is_expected.to be_an Array }
-    it "include an instance of EasyE::Plugin::Test" do
-      expect(subject.select { |x| x.kind_of? EasyE::Plugin::Test }.length).to be >= 1
+    it "include an instance of SnapEbs::Plugin::Test" do
+      expect(subject.select { |x| x.kind_of? SnapEbs::Plugin::Test }.length).to be >= 1
     end
   end
 
   context "collected option parser" do
     before do
-      expect_any_instance_of(EasyE::Plugin::Test).to receive(:collect_options).and_call_original
-      expect_any_instance_of(EasyE::Plugin::Test).to receive(:defined_options).and_call_original
-      expect(EasyE::Plugin::Test).to receive(:new).and_return(test_plugin)
+      expect_any_instance_of(SnapEbs::Plugin::Test).to receive(:collect_options).and_call_original
+      expect_any_instance_of(SnapEbs::Plugin::Test).to receive(:defined_options).and_call_original
+      expect(SnapEbs::Plugin::Test).to receive(:new).and_return(test_plugin)
     end
 
-    let(:option_parser) { easy_e.option_parser }
+    let(:option_parser) { snap_ebs.option_parser }
 
     subject { option_parser }
     it { is_expected.to be_an OptionParser }
@@ -48,9 +48,9 @@ describe EasyE::Plugin do
         before do
           expect(test_plugin).to receive(:before).and_call_original
           expect(test_plugin).to receive(:after).and_call_original
-          expect(easy_e).to receive(:take_snapshots) # and don't call original
+          expect(snap_ebs).to receive(:take_snapshots) # and don't call original
         end
-        before(:each) { easy_e.run }
+        before(:each) { snap_ebs.run }
         subject { test_plugin }
         it { is_expected.to be }
       end

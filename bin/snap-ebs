@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
 $:.unshift File.join File.dirname(__FILE__), '..'
-require 'lib/easy_e.rb'
+require 'lib/snap_ebs.rb'
 
-EasyE.new.execute
+SnapEbs.new.execute
