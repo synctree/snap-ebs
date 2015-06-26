@@ -35,13 +35,21 @@ Vagrant.configure(VAGRANT_FILE_API_VERSION) do |config|
     s.vm.box       = 'ubuntu/trusty64'
     s.vm.host_name = 'slave-mmap'
     s.vm.network 'private_network', ip: "192.168.10.4"
+  end
+
+  # a standalone server
+  config.vm.define 'standalone' do |s|
+    s.vm.box       = 'ubuntu/trusty64'
+    s.vm.host_name = 'standalone'
+    s.vm.network 'private_network', ip: "192.168.10.5"
 
     # for some reason the ansible provisioner only runs concurrently with the
     # correct facts when the definition is in the last box...
     config.vm.provision "ansible" do |ansible|
       ansible.groups = {
         "master" => [ "master" ],
-        "slave" => [ "slave-mmap", "slave-wt" ]
+        "slave" => [ "slave-mmap", "slave-wt" ],
+        "standalone" => [ "standalone" ]
       }
 
       ansible.playbook = 'playbook.yml'

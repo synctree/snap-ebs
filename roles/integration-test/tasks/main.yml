@@ -8,6 +8,9 @@
   - socat
   when: ansible_os_family == "Debian"
 
+- name: Determine whether this is a master node
+  set_fact: i_am_master="{{ (mongod_repl_master == inventory_hostname) or (mongod_repl_master == ansible_hostname) }}"
+
 - name: 'Install needed system libs'
   yum: name={{ item }} state=installed
   with_items:

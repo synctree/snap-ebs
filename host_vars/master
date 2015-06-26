@@ -4,3 +4,4 @@ mongod_pkgs:
   - python-selinux
   - mongodb-org
   - python-pymongo
+mongod_replication: true

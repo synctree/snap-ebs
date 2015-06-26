@@ -36,6 +36,7 @@ class EasyE::Plugin::MongoPlugin < EasyE::Plugin
 
   def client_options
     {
+      connect: :direct,
       user: options.user,
       password: options.password,
       server_selection_timeout: options.server_selection_timeout.to_i,
@@ -48,12 +49,11 @@ class EasyE::Plugin::MongoPlugin < EasyE::Plugin
   def before
     require 'mongo'
     Mongo::Logger.logger = logger
-    return logger.error "Refusing to operate" if carefully('check whether this node is a primary') { primary? }.nil?
-    return logger.error "This appears to be a primary member, refusing to operate" if primary?
+    return unless safe_to_operate?
 
     if wired_tiger?
       logger.info "Wired Tiger storage engine detected"
-      carefully('shutdown mongo') { shutdown_mongo } if options.shutdown
+      carefully('stop mongo') { stop_mongo } if options.shutdown
     else
       logger.info "MMAPv1 storage engine detected"
       carefully('lock mongo') { lock_mongo }
@@ -61,9 +61,6 @@ class EasyE::Plugin::MongoPlugin < EasyE::Plugin
   end
 
   def after
-    return logger.error "Refusing to operate" if carefully('check whether this node is a primary') { primary? }.nil?
-    return logger.error "This appears to be a primary member, refusing to operate" if primary?
-    
     if wired_tiger?
       carefully('start mongo') { start_mongo } if options.shutdown
     else
@@ -81,6 +78,14 @@ class EasyE::Plugin::MongoPlugin < EasyE::Plugin
 
   private
 
+  def safe_to_operate?
+    # we check for strict equality with booleans here, because nil means an
+    # error occurred while checking, and it is unsafe to operate
+    return true if (primary? == false) or (standalone? == true)
+    logger.error "This appears to be a primary member, refusing to operate"
+    false
+  end
+
   def wired_tiger?
     if @wired_tiger.nil?
       @wired_tiger = client.command(serverStatus: 1).first.has_key? WIRED_TIGER_KEY
@@ -89,14 +94,24 @@ class EasyE::Plugin::MongoPlugin < EasyE::Plugin
   end
 
   def primary?
-    if @primary.nil?
-      @primary = client.command(isMaster: 1).first['ismaster']
+    carefully 'check whether this node is a primary' do
+      if @primary.nil?
+        @primary = client.command(isMaster: 1).first['ismaster']
+      end
+      @primary
     end
-    @primary
   end
 
-  def shutdown_mongo
-    logger.info 'Shutting down mongodb'
+  def standalone?
+    # this will raise an error on a non-RS mongod
+    client.command(replSetGetStatus: 1)
+    false
+  rescue
+    true
+  end
+
+  def stop_mongo
+    logger.info 'Stopping mongodb'
     begin
       # this will always raise an exception after it completes
       client.command shutdown: 1
@@ -120,6 +135,6 @@ class EasyE::Plugin::MongoPlugin < EasyE::Plugin
 
   def unlock_mongo
     logger.info "Unlocking mongo"
-    client.database['$cmd.sys.unlock'].find().first
+    client.database['$cmd.sys.unlock'].find().read
   end
 end

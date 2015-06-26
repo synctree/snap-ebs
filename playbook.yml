@@ -13,7 +13,6 @@
   vars:
     mongod_smallfiles: "true"
     mongod_port: 27017
-    mongod_replication: true
     mongod_repl_servers: ["master", "slave-wt", "slave-mmap"]
     mongod_repl_master: "master"
     mongod_replset_name: easy-e
