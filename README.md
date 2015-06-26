@@ -1,13 +1,13 @@
-snap-ebsc2-ebs-automatic-consistent-snapshot
+snap-ebs
 ===
 
-Easier to use than it is to say, this project aims to provide easy, automatic,
-and consistent snapshots for AWS EBS volumes on EC2 instances.
+This project aims to provide easy, automatic, and consistent snapshots for AWS
+EBS volumes on EC2 instances.
 
 Some specific goals and how they are achieved:
 
  - *Safety*: refuses to operate unless everything seems ok, and tries desperately to leave your system no worse than it started
- - *Reliability*: comprehensive test sweet makes sure that SnapEbs behaves as expected, even in unexpected conditions.
+ - *Reliability*: comprehensive test sweet makes sure that `snap-ebs` behaves as expected, even in unexpected conditions.
  - *Visibility*: verbose logging options to inspect the decision-making process for any action
  - *Ease of Installation*: just install the gem and add one line to your crontab
  - *Ease of Use*: automatically detects volumes mounted to the machine
@@ -56,7 +56,7 @@ Like any good Ruby software, this tool has a unit test suite that seeks mostly t
 Vagrant Integration Testing
 ---
 
-The integration layer contains an Ansible + Vagrant setup to configure clusters of services for live-fire testing (the AWS bits are mocked out via SnapEbs's `--mock` flag). Simply running `vagrant up` will build a cluster of servers running MySQL, MongoDB, etc, configured in a master/slave architecture as approprite for the given system.
+The integration layer contains an Ansible + Vagrant setup to configure clusters of services for live-fire testing (the AWS bits are mocked out via `snap-ebs`'s `--mock` flag). Simply running `vagrant up` will build a cluster of servers running MySQL, MongoDB, etc, configured in a master/slave architecture as approprite for the given system.
 
-There is also a set of Ansible tasks that verify the operation of each plugin under **both ideal and pathological** conditions. This means that SnapEbs runs reliably, even when the services it operates on do not. Things like timeouts and service restart failures are modeled via `socat`, and assertions are made on the correct error output for each condition. For more info on how this is done, check `roles/integration-test/tasks/*.yml`
+There is also a set of Ansible tasks that verify the operation of each plugin under **both ideal and pathological** conditions. This means that `snap-ebs` runs reliably, even when the services it operates on do not. Things like timeouts and service restart failures are modeled via `socat`, and assertions are made on the correct error output for each condition. For more info on how this is done, check `roles/integration-test/tasks/*.yml`
 
