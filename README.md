@@ -30,11 +30,17 @@ sudo yum install gcc \
                  patch \
                  ruby-devel \
                  zlib-devel
+
+gem install snap-ebs
+crontab -e
 ```
 
+Usage
+===
+
+Put something like this in your root crontab:
 ```
-gem install snap-ebsc2-ebs-automatic-consistent-snapshot
-crontab -e
+snap-ebs -a AWSACCESSKEY -s AWSSECRETKEY --directory /data,/log,/journal --mongo --mongo-shutdown yes --logfile /var/log/snap-ebs.log
 ```
 
 Testing
