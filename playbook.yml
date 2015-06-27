@@ -22,4 +22,4 @@
     rvm1_install_flags: '--auto-dotfiles --user-install'
     rvm1_install_path: '/home/{{ ansible_ssh_user }}/.rvm'
     rvm1_rubies:
-      - 'ruby-2.2.2'
+      - 'ruby-2.2.0'

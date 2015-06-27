@@ -4,8 +4,8 @@ class SnapEbs::Plugin::MongoPlugin < SnapEbs::Plugin
   attr_accessor :client
   def defined_options
     {
-      service: 'Service to start after shutting down server',
       shutdown: 'Shutdown mongodb server (this is required if your data and journal are on different volumes',
+      command: 'Command to start mongodb if the server must be shut down (i.e. multi-volume Wired Tiger)',
       user: 'Mongo user',
       password: 'Mongo password',
       port: 'Mongo port',
@@ -19,9 +19,9 @@ class SnapEbs::Plugin::MongoPlugin < SnapEbs::Plugin
 
   def default_options
     {
-      service: 'mongodb',
-      port: '27017',
       shutdown: false,
+      command: "service mongod start",
+      port: '27017',
       host: 'localhost',
       server_selection_timeout: 30,
       wait_queue_timeout: 1,
@@ -122,8 +122,8 @@ class SnapEbs::Plugin::MongoPlugin < SnapEbs::Plugin
   end
 
   def start_mongo
-    logger.info "Starting mongodb via 'service #{options[:service]} start'"
-    system "service #{options[:service]} start"
+    logger.info "Starting mongodb via '#{options[:command]}'"
+    system options[:command]
   end
 
   def lock_mongo
