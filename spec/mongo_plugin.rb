@@ -33,6 +33,15 @@ describe SnapEbs::Plugin::MongoPlugin do
   let(:connection) { spy 'Mongo connection' } 
   let(:connection2) { spy 'Mongo connection #2' } 
 
+  context "when --mongo-command is set" do
+    before :each do
+      plugin.options.command = 'foo bar'
+      expect(plugin).to receive(:system).with('foo bar')
+      plugin.start_mongo
+    end
+    subject { plugin }
+    it { is_expected.to be }
+  end
 
   context "when connection times out" do
     before :each do

@@ -76,8 +76,6 @@ class SnapEbs::Plugin::MongoPlugin < SnapEbs::Plugin
     "Mongo"
   end
 
-  private
-
   def safe_to_operate?
     # we check for strict equality with booleans here, because nil means an
     # error occurred while checking, and it is unsafe to operate
