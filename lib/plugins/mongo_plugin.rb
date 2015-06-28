@@ -6,6 +6,8 @@ class SnapEbs::Plugin::MongoPlugin < SnapEbs::Plugin
     {
       shutdown: 'Shutdown mongodb server (this is required if your data and journal are on different volumes',
       command: 'Command to start mongodb if the server must be shut down (i.e. multi-volume Wired Tiger)',
+      'retry': 'How many times to retry starting or unlocking mongodb (default: 720)',
+      interval: 'Interval (in seconds) to wait when retrying (default: 5)',
       user: 'Mongo user',
       password: 'Mongo password',
       port: 'Mongo port',
@@ -21,6 +23,8 @@ class SnapEbs::Plugin::MongoPlugin < SnapEbs::Plugin
     {
       shutdown: false,
       command: "service mongod start",
+      'retry': 720,
+      interval: 5,
       port: '27017',
       host: 'localhost',
       server_selection_timeout: 30,
@@ -61,11 +65,7 @@ class SnapEbs::Plugin::MongoPlugin < SnapEbs::Plugin
   end
 
   def after
-    if wired_tiger?
-      carefully('start mongo') { start_mongo } if options.shutdown
-    else
-      carefully('unlock mongo') { unlock_mongo }
-    end
+    unlock_or_start_mongo
 
     if carefully('check that mongo is still accessible') { client.command(serverStatus: 1).first }
       logger.info "Received status from mongo, everything appears to be ok"
@@ -74,6 +74,20 @@ class SnapEbs::Plugin::MongoPlugin < SnapEbs::Plugin
 
   def name
     "Mongo"
+  end
+
+  def unlock_or_start_mongo
+    (options.retry.to_i + 1).times do
+      if wired_tiger?
+        return if carefully('start mongo') { start_mongo } if options.shutdown
+      else
+        return if carefully('unlock mongo') { unlock_mongo }
+      end
+
+      # otherwise we failed
+      logger.warn "Failed to start MongoDB, retrying in #{options.interval} seconds"
+      sleep options.interval
+    end
   end
 
   def safe_to_operate?

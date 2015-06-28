@@ -58,6 +58,8 @@ describe SnapEbs::Plugin::MongoPlugin do
       plugin.options.user = 'user'
       plugin.options.password = 'password'
       expect(Mongo::Client).to receive(:new).with(["localhost:27017"], user: 'user', password: 'password', server_selection_timeout: 30, wait_queue_timeout: 1, connection_timeout: 5, socket_timeout: 5).and_return(connection)
+      expect(plugin).to receive(:primary?).and_return(false)
+      expect(plugin).to receive(:unlock_or_start_mongo).and_return(true)
       plugin.before
     end
 
@@ -79,6 +81,7 @@ describe SnapEbs::Plugin::MongoPlugin do
         before :each do
           expect(connection).not_to receive(:command).with(fsync: 1, lock: true)
           expect(connection).to receive(:command).once.with(isMaster: 1).and_return(IS_MASTER_PRIMARY_RESULT)
+          expect(plugin).to receive(:system).with('service mongod start').and_return(true).once
           plugin.before
         end
 
@@ -124,7 +127,7 @@ describe SnapEbs::Plugin::MongoPlugin do
           context "and start up succeeds" do
             before :each do
               expect(Mongo::Client).to receive(:new).and_return(connection2)
-              expect(plugin).to receive(:system).with('service mongodb start')
+              expect(plugin).to receive(:system).with('service mongod start').and_return(true).once
               plugin.before
             end
 
@@ -134,6 +137,23 @@ describe SnapEbs::Plugin::MongoPlugin do
 
             subject { connection2 }
             it { is_expected.to receive(:command).once.with(serverStatus: 1) }
+          end
+
+          context "and start up fails" do
+            before :each do
+              plugin.options.retry = 1
+              plugin.options.interval = 0
+              expect(Mongo::Client).to receive(:new).and_return(connection2)
+              expect(plugin).to receive(:system).with('service mongod start').and_return(false).exactly(2)
+              plugin.before
+            end
+
+            after :each do
+              plugin.after
+            end
+
+            subject { connection2 }
+            it { is_expected.to receive(:command).with(serverStatus: 1) }
           end
         end
       end
