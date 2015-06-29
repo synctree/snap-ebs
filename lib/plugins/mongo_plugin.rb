@@ -86,7 +86,7 @@ class SnapEbs::Plugin::MongoPlugin < SnapEbs::Plugin
 
       # otherwise we failed
       logger.warn "Failed to start MongoDB, retrying in #{options.interval} seconds"
-      sleep options.interval
+      sleep options.interval.to_i
     end
   end
 
@@ -100,7 +100,9 @@ class SnapEbs::Plugin::MongoPlugin < SnapEbs::Plugin
 
   def wired_tiger?
     if @wired_tiger.nil?
-      @wired_tiger = client.command(serverStatus: 1).first.has_key? WIRED_TIGER_KEY
+      @wired_tiger = carefully 'detect mongodb\'s storage engine' do
+        client.command(serverStatus: 1).first.has_key? WIRED_TIGER_KEY
+      end
     end
     @wired_tiger
   end

@@ -38,7 +38,7 @@ class SnapEbs::Plugin
 
   def carefully msg
     yield
-  rescue Exception => e
+  rescue => e
     logger.error "Error while trying to #{msg}"
     logger.error e
     nil

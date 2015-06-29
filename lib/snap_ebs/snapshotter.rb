@@ -3,6 +3,8 @@ require 'httparty'
 module SnapEbs::Snapshotter
   AWS_INSTANCE_ID_URL = 'http://169.254.169.254/latest/dynamic/instance-identity/document'
 
+  attr_writer :compute
+
   def take_snapshots
     attached_volumes.collect do |vol|
       next unless should_snap vol

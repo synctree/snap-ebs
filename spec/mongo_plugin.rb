@@ -45,7 +45,7 @@ describe SnapEbs::Plugin::MongoPlugin do
 
   context "when connection times out" do
     before :each do
-      expect(Mongo::Client).to receive(:new).and_raise(Mongo::Error::NoServerAvailable.new("nobody's home!"))
+      expect(Mongo::Client).to receive(:new).and_raise(Mongo::Error::NoServerAvailable, "nobody's home!").at_least(1)
       plugin.before
     end
 
@@ -57,9 +57,8 @@ describe SnapEbs::Plugin::MongoPlugin do
     before :each do
       plugin.options.user = 'user'
       plugin.options.password = 'password'
-      expect(Mongo::Client).to receive(:new).with(["localhost:27017"], user: 'user', password: 'password', server_selection_timeout: 30, wait_queue_timeout: 1, connection_timeout: 5, socket_timeout: 5).and_return(connection)
+      expect(Mongo::Client).to receive(:new).with(["localhost:27017"], connect: :direct, user: 'user', password: 'password', server_selection_timeout: 30, wait_queue_timeout: 1, connection_timeout: 5, socket_timeout: 5).and_return(connection)
       expect(plugin).to receive(:primary?).and_return(false)
-      expect(plugin).to receive(:unlock_or_start_mongo).and_return(true)
       plugin.before
     end
 
@@ -95,12 +94,14 @@ describe SnapEbs::Plugin::MongoPlugin do
 
       context "on mmapv1" do
         let(:cmd_sys_unlock) { spy('$cmd.sys.unlock') }
+        let(:result) { spy 'mongo result' }
         before :each do
           expect(connection).to receive(:command).at_least(1).with(serverStatus: 1).and_return(MMAP_STATUS)
           expect(connection).to receive(:command).once.with(fsync: 1, lock: true).and_return(FSYNC_LOCK_SUCCESS_RESULT)
           expect(connection).to receive(:command).once.with(isMaster: 1).and_return(IS_MASTER_SECONDARY_RESULT)
           expect(connection).to receive(:[]).with('$cmd.sys.unlock').and_return(cmd_sys_unlock)
-          expect(cmd_sys_unlock).to receive(:find).once.and_return(FSYNC_UNLOCK_SUCCESS_RESULT)
+          expect(cmd_sys_unlock).to receive(:find).once.and_return(result)
+          expect(result).to receive(:read).and_return(FSYNC_UNLOCK_SUCCESS_RESULT)
           expect(connection).not_to receive(:command).with(shutdown: 1)
           plugin.before
         end
