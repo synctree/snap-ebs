@@ -2,6 +2,10 @@ require 'optparse'
 
 class SnapEbs
   module Options
+    # Gets the root `option_parser`. Plugins do not append to this directly,
+    # but instead supply a list of options, arguments, descriptions, and
+    # default values. `SnapEbs` manages the namespacing of options, and each
+    # plugin receives its own `options` object.
     def option_parser
       unless @option_parser
         @option_parser = OptionParser.new do |o|
@@ -44,6 +48,7 @@ class SnapEbs
     end
   end
 
+  # Get the root `options` object, and instance of OpenStruct
   def options
     @options ||= OpenStruct.new
   end

@@ -5,6 +5,8 @@ module SnapEbs::Snapshotter
 
   attr_writer :compute
 
+  # Takes snapshots of attached volumes (optionally filtering by volumes
+  # mounted to the given directories)
   def take_snapshots
     attached_volumes.collect do |vol|
       next unless should_snap vol
@@ -17,7 +19,9 @@ module SnapEbs::Snapshotter
     end
   end
 
-  # lazy loaders
+  # Get the Fog compute object. When `--mock` is given, `Fog.mock!` is called
+  # and  information normally auto-detected from AWS is injected with dummy
+  # values to circumvent the lazy loaders.
   def compute
     require 'fog/aws'
     if options[:mock]
@@ -34,6 +38,8 @@ module SnapEbs::Snapshotter
       :provider => "AWS"
     }) 
   end
+
+  private
 
   def attached_volumes
     @attached_volumes ||= compute.volumes.select { |vol| vol.server_id == instance_id }

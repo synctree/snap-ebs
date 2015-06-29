@@ -20,10 +20,6 @@ class SnapEbs::Plugin
     @options ||= OpenStruct.new default_options
   end
 
-  def logger
-    SnapEbs.logger false
-  end
-
   def collect_options option_parser
     option_parser.on "--#{name.downcase}", "Enable the #{name} plugin" do
       options.enable = true
@@ -36,12 +32,29 @@ class SnapEbs::Plugin
     end
   end
 
+  protected
+
+  # Executes the given block with error handling, and prints helpful error
+  # messages when an exception is caught.
+  #
+  # Returns the result of the block, or nil if an exception occured
+  #
+  # ```
+  # carefully 'reticulate splines' do
+  #   splines.each &:reticulate
+  # end
+  # ```
+  #
   def carefully msg
     yield
   rescue => e
     logger.error "Error while trying to #{msg}"
     logger.error e
     nil
+  end
+
+  def logger
+    SnapEbs.logger false
   end
 end
 

@@ -34,22 +34,6 @@ class SnapEbs::Plugin::MongoPlugin < SnapEbs::Plugin
     }
   end
 
-  def client
-    @client ||= Mongo::Client.new [ "#{options.host}:#{options.port}" ], client_options
-  end
-
-  def client_options
-    {
-      connect: :direct,
-      user: options.user,
-      password: options.password,
-      server_selection_timeout: options.server_selection_timeout.to_i,
-      wait_queue_timeout: options.wait_queue_timeout.to_i,
-      connection_timeout: options.connection_timeout.to_i,
-      socket_timeout: options.socket_timeout.to_i
-    }
-  end
-
   def before
     require 'mongo'
     Mongo::Logger.logger = logger
@@ -75,6 +59,8 @@ class SnapEbs::Plugin::MongoPlugin < SnapEbs::Plugin
   def name
     "Mongo"
   end
+
+  private
 
   def unlock_or_start_mongo
     (options.retry.to_i + 1).times do
@@ -150,5 +136,21 @@ class SnapEbs::Plugin::MongoPlugin < SnapEbs::Plugin
   def unlock_mongo
     logger.info "Unlocking mongo"
     client.database['$cmd.sys.unlock'].find().read
+  end
+
+  def client
+    @client ||= Mongo::Client.new [ "#{options.host}:#{options.port}" ], client_options
+  end
+
+  def client_options
+    {
+      connect: :direct,
+      user: options.user,
+      password: options.password,
+      server_selection_timeout: options.server_selection_timeout.to_i,
+      wait_queue_timeout: options.wait_queue_timeout.to_i,
+      connection_timeout: options.connection_timeout.to_i,
+      socket_timeout: options.socket_timeout.to_i
+    }
   end
 end

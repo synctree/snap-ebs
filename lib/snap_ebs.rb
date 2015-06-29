@@ -34,11 +34,16 @@ class SnapEbs
     SnapEbs::Plugin.registered_plugins
   end
 
+  # Executes plugin before hooks, takes the snapshot, then runs the after
+  # hooks. Plugin hooks are called within `rescue` blocks to isolate errors
+  # from affecting other plugins or the snapshot plugins. Note that non-
+  # standard exceptions (i.e. out of memory or keyboard interrupt) will still
+  # cause a execution to abort.
   def run
     plugins.each do |plugin|
       begin
         plugin.before if plugin.options.enable
-      rescue Exception => e
+      rescue => e
         logger.error "Encountered error while running the #{plugin.name} plugin's before hook"
         logger.error e
       end
@@ -49,19 +54,22 @@ class SnapEbs
     plugins.each do |plugin|
       begin
         plugin.after if plugin.options.enable
-      rescue Exception => e
+      rescue => e
         logger.error "Encountered error while running the #{plugin.name} plugin's after hook"
         logger.error e
       end
     end
   end
 
+  # Entry point for the `snap-ebs` binary
   def execute
     option_parser.parse!
     logger.debug "Debug logging enabled"
     run
   end
 
+  # Get the global logger instance
+  # `logger.debug 'reticulating splines'`
   def logger
     # HACK -- the logfile argument only gets used on the first invocation
     SnapEbs.logger options.logfile

@@ -38,7 +38,9 @@ describe SnapEbs::Plugin::MongoPlugin do
     before :each do
       plugin.options.command = 'foo bar'
       expect(plugin).to receive(:system).with('foo bar')
-      plugin.start_mongo
+
+      # send ignores method visibility
+      plugin.send :start_mongo
     end
     subject { plugin }
     it { is_expected.to be }
