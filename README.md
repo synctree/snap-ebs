@@ -1,6 +1,9 @@
 snap-ebs
 ===
 
+![snap-ebs logo -- the snapping turtle](http://i.imgur.com/DgUZmIq.png)
+> Backup your EBS volumes in a snap
+
 This project aims to provide easy, automatic, and consistent snapshots for AWS
 EBS volumes on EC2 instances.
 
