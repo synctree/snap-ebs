@@ -6,7 +6,7 @@ class SnapEbs::Plugin::MongoPlugin < SnapEbs::Plugin
     {
       shutdown: 'Shutdown mongodb server (this is required if your data and journal are on different volumes',
       command: 'Command to start mongodb if the server must be shut down (i.e. multi-volume Wired Tiger)',
-      'retry': 'How many times to retry starting or unlocking mongodb (default: 720)',
+      retry: 'How many times to retry starting or unlocking mongodb (default: 720)',
       interval: 'Interval (in seconds) to wait when retrying (default: 5)',
       user: 'Mongo user',
       password: 'Mongo password',
@@ -23,7 +23,7 @@ class SnapEbs::Plugin::MongoPlugin < SnapEbs::Plugin
     {
       shutdown: false,
       command: "service mongod start",
-      'retry': 720,
+      retry: 720,
       interval: 5,
       port: '27017',
       host: 'localhost',
