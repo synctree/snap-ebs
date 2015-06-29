@@ -22,6 +22,10 @@ class SnapEbs
     @@logger
   end
 
+  def self.logger= logger_
+    @@logger = logger_
+  end
+
   def plugins
     @plugins ||= registered_plugins.collect { |klass| klass.new }
   end

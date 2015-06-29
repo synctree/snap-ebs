@@ -29,6 +29,7 @@ IS_MASTER_SECONDARY_RESULT = [{
 }]
 
 describe SnapEbs::Plugin::MongoPlugin do
+  before() { SnapEbs.logger = spy 'logger' }
   let(:plugin) { SnapEbs::Plugin::MongoPlugin.new }
   let(:connection) { spy 'Mongo connection' } 
   let(:connection2) { spy 'Mongo connection #2' } 

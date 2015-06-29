@@ -18,6 +18,7 @@ describe SnapEbs::Snapshotter do
   end
 
   context "take_snapshots" do
+    before() { SnapEbs.logger = spy 'logger' }
     let(:attachedVolume1) { spy('attachedVolume1') }
     let(:attachedVolume2) { spy('attachedVolume2') }
     let(:detachedVolume1) { spy('detachedVolume1') }
