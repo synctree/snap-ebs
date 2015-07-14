@@ -27,7 +27,10 @@ describe SnapEbs::Snapshotter do
     let(:snapshots_taken) { snap_ebs.take_snapshots }
 
     before do
-      # mockc instance ID info
+      # *consistent* snapshots
+      expect(snap_ebs).to receive(:system).once.with('sync')
+
+      # mock instance ID info
       expect(HTTParty).to receive(:get).at_least(:once).with(SnapEbs::Snapshotter::AWS_INSTANCE_ID_URL) { AWS_INSTANCE_ID_URL_RESPONSE }
 
       # mock volume list

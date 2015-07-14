@@ -8,6 +8,7 @@ module SnapEbs::Snapshotter
   # Takes snapshots of attached volumes (optionally filtering by volumes
   # mounted to the given directories)
   def take_snapshots
+    system 'sync'
     attached_volumes.collect do |vol|
       next unless should_snap vol
       logger.debug "Snapping #{vol.id}"
