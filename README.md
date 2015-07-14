@@ -35,7 +35,6 @@ sudo yum install gcc \
                  zlib-devel
 
 gem install snap-ebs
-crontab -e
 ```
 
 Usage
