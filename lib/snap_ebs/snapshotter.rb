@@ -78,6 +78,14 @@ module SnapEbs::Snapshotter
     "#{Time.now.strftime "%Y%m%d%H%M%S"}-#{id}-#{vol.device}"
   end
 
+  def device_from_directory dir
+    `df -T #{dir} | grep dev`.split(/\s/).first.strip
+  end
+
+  def is_root_device? vol
+    device_from_directory('/') == device_name(vol)
+  end
+
   def device_name vol
     vol.device.gsub('/dev/s', '/dev/xv') rescue vol.device
   end
@@ -87,7 +95,7 @@ module SnapEbs::Snapshotter
   end
 
   def devices_to_snap
-    @devices_to_snap ||= options.directory.split(',').map { |dir| `df -T #{dir} | grep dev`.split(/\s/).first.strip }
+    @devices_to_snap ||= options.directory.split(',').map { |dir| device_from_directory dir }
   end
 
   def fs_freeze_command
@@ -95,10 +103,12 @@ module SnapEbs::Snapshotter
   end
 
   def fs_freeze vol
+    return logger.warn "Refusing to freeze root device #{device_name vol}" if is_root_device? vol
     system("#{fs_freeze_command} -f #{device_name vol}")
   end
 
   def fs_unfreeze vol
+    return logger.warn "Refusing to unfreeze root device #{device_name vol}" if is_root_device? vol
     system("#{fs_freeze_command} -u #{device_name vol}")
   end
 end

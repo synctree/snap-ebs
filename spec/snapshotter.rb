@@ -38,7 +38,12 @@ describe SnapEbs::Snapshotter do
       expect(attachedVolume1).to receive_messages(server_id: "i-7a12445a", id: "vol-00000001", device: "/dev/sdy")
       expect(attachedVolume2).to receive_messages(server_id: "i-7a12445a", id: "vol-00000002", device: "/dev/sdz")
       allow(detachedVolume1).to receive_messages(server_id: nil,          id: "vol-00000003")
-      expect(snap_ebs).to receive(:devices_to_snap).twice.and_return(['/dev/xvdy', '/dev/xvdz'])
+
+      # mock device mapping
+      allow(snap_ebs).to receive(:device_from_directory).with('/').and_return('/dev/xvdy')
+      expect(snap_ebs).to receive(:device_from_directory).with('/foo').and_return('/dev/xvdy')
+      expect(snap_ebs).to receive(:device_from_directory).with('/bar').and_return('/dev/xvdz')
+
       expect(snap_ebs.compute).to receive(:volumes).at_least(:once) do
         [ attachedVolume1, attachedVolume2, detachedVolume1 ]
       end
@@ -55,9 +60,9 @@ describe SnapEbs::Snapshotter do
       before do
         snap_ebs.options[:fs_freeze] = true
         expect(snap_ebs).to receive(:system).with("which fsfreeze > /dev/null").and_return true
-        expect(snap_ebs).to receive(:system).with("fsfreeze -f /dev/xvdy")
+        expect(snap_ebs).not_to receive(:system).with("fsfreeze -f /dev/xvdy")
         expect(snap_ebs).to receive(:system).with("fsfreeze -f /dev/xvdz")
-        expect(snap_ebs).to receive(:system).with("fsfreeze -u /dev/xvdy")
+        expect(snap_ebs).not_to receive(:system).with("fsfreeze -u /dev/xvdy")
         expect(snap_ebs).to receive(:system).with("fsfreeze -u /dev/xvdz")
       end
 
