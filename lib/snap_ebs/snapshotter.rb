@@ -83,7 +83,5 @@ module SnapEbs::Snapshotter
 
   def devices_to_snap
     @devices_to_snap ||= options.directory.split(',').map { |dir| `df -T #{dir} | grep dev`.split(/\s/).first.strip }
-    logger.debug @devices_to_snap
-    @devices_to_snap
   end
 end
