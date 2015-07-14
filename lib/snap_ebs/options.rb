@@ -33,7 +33,10 @@ class SnapEbs
 
           o.on("-l", "--logfile FILE", "Path to a file used for logging") do |filename|
             options.logfile = filename
-            logger.debug filename
+          end
+
+          o.on("-f", "--fs-freeze", "Freeze filesystems for fsfreeze or xfs_freeze before snapping (unfreezes after)") do |fs_freeze|
+            options.fs_freeze = fs_freeze
           end
 
           o.on("-d", "--directory PATH", "Only snap volumes mounted to PATH, a comma-separated list of directories") do |d|

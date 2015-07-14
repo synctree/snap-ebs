@@ -10,7 +10,8 @@ module SnapEbs::Snapshotter
   def take_snapshots
     system 'sync'
     attached_volumes.collect do |vol|
-      fs_freeze vol if options[:fs_freeze]
+      dir = device_to_directory device_name vol
+      fs_freeze dir if options[:fs_freeze]
       next unless should_snap vol
       logger.debug "Snapping #{vol.id}"
       snapshot = compute.snapshots.new
@@ -18,7 +19,7 @@ module SnapEbs::Snapshotter
       snapshot.description = snapshot_name(vol)
       snapshot.save
       snapshot
-      fs_unfreeze vol if options[:fs_freeze]
+      fs_unfreeze dir if options[:fs_freeze]
     end
   end
 
@@ -78,12 +79,19 @@ module SnapEbs::Snapshotter
     "#{Time.now.strftime "%Y%m%d%H%M%S"}-#{id}-#{vol.device}"
   end
 
-  def device_from_directory dir
+  def directory_to_device dir
     `df -T #{dir} | grep dev`.split(/\s/).first.strip
   end
 
-  def is_root_device? vol
-    device_from_directory('/') == device_name(vol)
+  def device_to_directory device
+    `df -T | grep dev`.lines.each do |lines|
+      parts = line.split(/\s/).map &:strip
+      return parts.list if parts.first == device
+    end
+  end
+
+  def is_root_device? dir
+    directory_to_device('/') == directory_to_device(dir)
   end
 
   def device_name vol
@@ -95,20 +103,20 @@ module SnapEbs::Snapshotter
   end
 
   def devices_to_snap
-    @devices_to_snap ||= options.directory.split(',').map { |dir| device_from_directory dir }
+    @devices_to_snap ||= options.directory.split(',').map { |dir| directory_to_device dir }
   end
 
   def fs_freeze_command
     @fs_freeze_command ||= system('which fsfreeze > /dev/null') ? 'fsfreeze' : 'xfs_freeze'
   end
 
-  def fs_freeze vol
-    return logger.warn "Refusing to freeze root device #{device_name vol}" if is_root_device? vol
-    system("#{fs_freeze_command} -f #{device_name vol}")
+  def fs_freeze dir
+    return logger.warn "Refusing to freeze #{dir}, which is the root device (#{directory_to_device dir})" if is_root_device? dir
+    system("#{fs_freeze_command} -f #{dir}")
   end
 
-  def fs_unfreeze vol
-    return logger.warn "Refusing to unfreeze root device #{device_name vol}" if is_root_device? vol
-    system("#{fs_freeze_command} -u #{device_name vol}")
+  def fs_unfreeze dir
+    return logger.warn "Refusing to unfreeze #{dir}, which is the root device (#{directory_to_device dir})" if is_root_device? dir
+    system("#{fs_freeze_command} -u #{dir}")
   end
 end

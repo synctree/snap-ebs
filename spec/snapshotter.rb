@@ -40,9 +40,13 @@ describe SnapEbs::Snapshotter do
       allow(detachedVolume1).to receive_messages(server_id: nil,          id: "vol-00000003")
 
       # mock device mapping
-      allow(snap_ebs).to receive(:device_from_directory).with('/').and_return('/dev/xvdy')
-      expect(snap_ebs).to receive(:device_from_directory).with('/foo').and_return('/dev/xvdy')
-      expect(snap_ebs).to receive(:device_from_directory).with('/bar').and_return('/dev/xvdz')
+      expect(snap_ebs).to receive(:directory_to_device).at_least(:once).with('/').and_return('/dev/xvdy')
+      expect(snap_ebs).to receive(:directory_to_device).at_least(:once).with('/foo').and_return('/dev/xvdy')
+      expect(snap_ebs).to receive(:directory_to_device).at_least(:once).with('/bar').and_return('/dev/xvdz')
+
+      # mock device mapping
+      allow(snap_ebs).to receive(:device_to_directory).with('/dev/xvdy').and_return('/foo')
+      expect(snap_ebs).to receive(:device_to_directory).with('/dev/xvdz').and_return('/bar')
 
       expect(snap_ebs.compute).to receive(:volumes).at_least(:once) do
         [ attachedVolume1, attachedVolume2, detachedVolume1 ]
@@ -50,7 +54,7 @@ describe SnapEbs::Snapshotter do
 
       # mock snapshot creation
       expect(snap_ebs.compute).to receive(:snapshots).at_least(:once) { compute_snapshots }
-      expect(compute_snapshots).to receive(:new).at_least(:once) { snapshot }
+      expect(compute_snapshots).to receive(:new).twice { snapshot }
       expect(snapshot).to receive("volume_id=").with("vol-00000001")
       expect(snapshot).to receive("volume_id=").with("vol-00000002")
       expect(snapshot).to receive(:save).twice
@@ -60,17 +64,12 @@ describe SnapEbs::Snapshotter do
       before do
         snap_ebs.options[:fs_freeze] = true
         expect(snap_ebs).to receive(:system).with("which fsfreeze > /dev/null").and_return true
-        expect(snap_ebs).not_to receive(:system).with("fsfreeze -f /dev/xvdy")
-        expect(snap_ebs).to receive(:system).with("fsfreeze -f /dev/xvdz")
-        expect(snap_ebs).not_to receive(:system).with("fsfreeze -u /dev/xvdy")
-        expect(snap_ebs).to receive(:system).with("fsfreeze -u /dev/xvdz")
+        expect(snap_ebs).not_to receive(:system).with("fsfreeze -f /foo")
+        expect(snap_ebs).to receive(:system).with("fsfreeze -f /bar")
+        expect(snap_ebs).not_to receive(:system).with("fsfreeze -u /foo")
+        expect(snap_ebs).to receive(:system).with("fsfreeze -u /bar")
       end
 
-      subject { snapshots_taken }
-      it { is_expected.to be_an Array }
-    end
-
-    context "snapshots_taken" do 
       subject { snapshots_taken }
       it { is_expected.to be_an Array }
     end
