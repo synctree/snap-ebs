@@ -10,6 +10,7 @@ module SnapEbs::Snapshotter
   def take_snapshots
     system 'sync'
     attached_volumes.collect do |vol|
+      fs_freeze vol if options[:fs_freeze]
       next unless should_snap vol
       logger.debug "Snapping #{vol.id}"
       snapshot = compute.snapshots.new
@@ -17,6 +18,7 @@ module SnapEbs::Snapshotter
       snapshot.description = snapshot_name(vol)
       snapshot.save
       snapshot
+      fs_unfreeze vol if options[:fs_freeze]
     end
   end
 
@@ -76,12 +78,27 @@ module SnapEbs::Snapshotter
     "#{Time.now.strftime "%Y%m%d%H%M%S"}-#{id}-#{vol.device}"
   end
 
+  def device_name vol
+    vol.device.gsub('/dev/s', '/dev/xv') rescue vol.device
+  end
+
   def should_snap vol
-    normalized_device = vol.device.gsub('/dev/s', '/dev/xv') rescue vol.device
-    options.directory.nil? or devices_to_snap.include?(normalized_device)
+    options.directory.nil? or devices_to_snap.include?(device_name vol)
   end
 
   def devices_to_snap
     @devices_to_snap ||= options.directory.split(',').map { |dir| `df -T #{dir} | grep dev`.split(/\s/).first.strip }
+  end
+
+  def fs_freeze_command
+    @fs_freeze_command ||= system('which fsfreeze > /dev/null') ? 'fsfreeze' : 'xfs_freeze'
+  end
+
+  def fs_freeze vol
+    system("#{fs_freeze_command} -f #{device_name vol}")
+  end
+
+  def fs_unfreeze vol
+    system("#{fs_freeze_command} -u #{device_name vol}")
   end
 end

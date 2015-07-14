@@ -27,6 +27,7 @@ describe SnapEbs::Snapshotter do
     let(:snapshots_taken) { snap_ebs.take_snapshots }
 
     before do
+      snap_ebs.options[:directory] = '/foo,/bar'
       # *consistent* snapshots
       expect(snap_ebs).to receive(:system).once.with('sync')
 
@@ -34,9 +35,10 @@ describe SnapEbs::Snapshotter do
       expect(HTTParty).to receive(:get).at_least(:once).with(SnapEbs::Snapshotter::AWS_INSTANCE_ID_URL) { AWS_INSTANCE_ID_URL_RESPONSE }
 
       # mock volume list
-      expect(attachedVolume1).to receive_messages(server_id: "i-7a12445a", id: "vol-00000001")
-      expect(attachedVolume2).to receive_messages(server_id: "i-7a12445a", id: "vol-00000002")
-      expect(detachedVolume1).to receive_messages(server_id: "i-deadbeef")
+      expect(attachedVolume1).to receive_messages(server_id: "i-7a12445a", id: "vol-00000001", device: "/dev/sdy")
+      expect(attachedVolume2).to receive_messages(server_id: "i-7a12445a", id: "vol-00000002", device: "/dev/sdz")
+      allow(detachedVolume1).to receive_messages(server_id: nil,          id: "vol-00000003")
+      expect(snap_ebs).to receive(:devices_to_snap).twice.and_return(['/dev/xvdy', '/dev/xvdz'])
       expect(snap_ebs.compute).to receive(:volumes).at_least(:once) do
         [ attachedVolume1, attachedVolume2, detachedVolume1 ]
       end
@@ -47,6 +49,20 @@ describe SnapEbs::Snapshotter do
       expect(snapshot).to receive("volume_id=").with("vol-00000001")
       expect(snapshot).to receive("volume_id=").with("vol-00000002")
       expect(snapshot).to receive(:save).twice
+    end
+
+    context "with --fs-freeze" do 
+      before do
+        snap_ebs.options[:fs_freeze] = true
+        expect(snap_ebs).to receive(:system).with("which fsfreeze > /dev/null").and_return true
+        expect(snap_ebs).to receive(:system).with("fsfreeze -f /dev/xvdy")
+        expect(snap_ebs).to receive(:system).with("fsfreeze -f /dev/xvdz")
+        expect(snap_ebs).to receive(:system).with("fsfreeze -u /dev/xvdy")
+        expect(snap_ebs).to receive(:system).with("fsfreeze -u /dev/xvdz")
+      end
+
+      subject { snapshots_taken }
+      it { is_expected.to be_an Array }
     end
 
     context "snapshots_taken" do 
