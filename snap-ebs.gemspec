@@ -1,7 +1,7 @@
 Gem::Specification.new do |s|
   s.name        = 'snap-ebs'
-  s.version     = '0.0.20'
-  s.date        = '2015-07-28'
+  s.version     = '0.0.21'
+  s.date        = '2015-07-29'
   s.summary     = "EBS backups in a snap"
   s.description = "Tested, service-aware and consistent AWS EC2 backups via EBS snapshots."
   s.authors     = ["Bryan Conrad"]
