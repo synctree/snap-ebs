@@ -84,10 +84,9 @@ module SnapEbs::Snapshotter
   end
 
   def device_to_directory device
-    `df -T | grep dev`.lines.each do |lines|
-      parts = line.split(/\s/).map &:strip
-      return parts.list if parts.first == device
-    end
+    parts = `cat /etc/mtab | grep #{device}`.split(/\s+/)
+    logger.warn "Could not find directory for #{device}" unless parts.length > 1
+    parts[1]
   end
 
   def is_root_device? dir

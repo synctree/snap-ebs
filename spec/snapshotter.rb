@@ -6,6 +6,12 @@ AWS_INSTANCE_ID_URL_RESPONSE = <<EOS
 }
 EOS
 
+MOCK_DEVICE_MAPPING = {
+  '/' => '/dev/xvdy',
+  '/foo' => '/dev/xvdy',
+  '/bar' => '/dev/xvdz',
+}
+
 describe SnapEbs::Snapshotter do
   let(:snap_ebs) {
     result = SnapEbs.new
@@ -39,14 +45,13 @@ describe SnapEbs::Snapshotter do
       expect(attachedVolume2).to receive_messages(server_id: "i-7a12445a", id: "vol-00000002", device: "/dev/sdz")
       allow(detachedVolume1).to receive_messages(server_id: nil,          id: "vol-00000003")
 
-      # mock device mapping
-      expect(snap_ebs).to receive(:directory_to_device).at_least(:once).with('/').and_return('/dev/xvdy')
-      expect(snap_ebs).to receive(:directory_to_device).at_least(:once).with('/foo').and_return('/dev/xvdy')
-      expect(snap_ebs).to receive(:directory_to_device).at_least(:once).with('/bar').and_return('/dev/xvdz')
+      MOCK_DEVICE_MAPPING.each do |dir,dev|
+        expect(snap_ebs).to receive(:`).at_least(:once).with("df -T #{dir} | grep dev").and_return(dev)
+      end
 
-      # mock device mapping
-      allow(snap_ebs).to receive(:device_to_directory).with('/dev/xvdy').and_return('/foo')
-      expect(snap_ebs).to receive(:device_to_directory).with('/dev/xvdz').and_return('/bar')
+      MOCK_DEVICE_MAPPING.each do |dir,dev|
+        allow(snap_ebs).to receive(:`).with("cat /etc/mtab | grep #{dev}").and_return("#{dev} #{dir} foo bar baz bim")
+      end
 
       expect(snap_ebs.compute).to receive(:volumes).at_least(:once) do
         [ attachedVolume1, attachedVolume2, detachedVolume1 ]
