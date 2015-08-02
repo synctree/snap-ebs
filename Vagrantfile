@@ -16,6 +16,11 @@ Vagrant.configure(VAGRANT_FILE_API_VERSION) do |config|
   config.vm.provision 'shell', inline: 'chown vagrant:vagrant -R /home/vagrant/snap-ebs'
   config.vm.provision 'file', source: './Gemfile', destination: '/home/vagrant/snap-ebs/Gemfile'
 
+  config.vm.provider 'virtualbox' do |v|
+    v.cpus = 2
+    v.memory = 2048
+  end
+
   # the mongodb master server
   config.vm.define 'master' do |s|
     s.vm.box       = 'ubuntu/trusty64'
