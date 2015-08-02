@@ -2,6 +2,17 @@
 mongod_storage_engine: wiredTiger
 mysql_server_id: "3"
 mysql_replication_role: 'slave'
+
+# centos 70 doesn't come with mysql, but this is an interesting test
 mysql_packages:
   - mariadb
   - mariadb-server
+  - mariadb-libs
+  - MySQL-python
+  - perl-DBD-MySQL
+ 
+__mysql_daemon: mariadb
+mysql_daemon: mariadb
+mysql_log_error: /var/log/mariadb/mariadb.log
+mysql_syslog_tag: mariadb
+mysql_pid_file: /var/run/mariadb/mariadb.pid
