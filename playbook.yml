@@ -5,8 +5,7 @@
   roles:
     - vagrant
     - geerlingguy.mysql 
-    # - mysql
-    # - mongo
+    - mongo
     - rvm_io.rvm1-ruby
     - role: integration-test
       tags:
