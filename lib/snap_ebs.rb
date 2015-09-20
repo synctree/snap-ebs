@@ -4,6 +4,7 @@ require 'ostruct'
 require 'snap_ebs/options'
 require 'snap_ebs/snapshotter'
 require 'snap_ebs/plugin'
+require 'snap_ebs/version'
 
 class SnapEbs
   include SnapEbs::Options

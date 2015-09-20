@@ -42,6 +42,11 @@ class SnapEbs
           o.on("-d", "--directory PATH", "Only snap volumes mounted to PATH, a comma-separated list of directories") do |d|
             options.directory = d
           end
+
+          o.on("", "--version", "Show version and exit") do |d|
+            puts "snap-ebs v#{::SnapEbs::VERSION}"
+            exit 0
+          end
         end
 
         plugins.each { |plugin| plugin.collect_options @option_parser }
