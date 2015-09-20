@@ -13,4 +13,7 @@
 - name: ensure mongo is running
   service: name=mongod state=started
 
+- name: ensure mysql is running
+  service: name={{ mysql_daemon }} state=started
+
 - wait_for: port={{ mongod_port }}

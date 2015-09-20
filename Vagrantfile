@@ -52,9 +52,12 @@ Vagrant.configure(VAGRANT_FILE_API_VERSION) do |config|
     # correct facts when the definition is in the last box...
     config.vm.provision "ansible" do |ansible|
       ansible.groups = {
-        "master" => [ "master" ],
-        "slave" => [ "slave-mmap", "slave-wt" ],
-        "standalone" => [ "standalone" ]
+        master:     %w(master),
+        slave:      %w(slave-mmap slave-wt),
+        standalone: %w(standalone),
+        centos:     %w(slave-wt),
+        mmap:       %w(master slave-mmap),
+        wt:         %w(standalone slave-wt)
       }
 
       ansible.playbook = 'playbook.yml'

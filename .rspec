@@ -1,1 +1,1 @@
-spec/*.rb -r ./lib/snap_ebs
+./spec/*.rb -r ./lib/snap_ebs

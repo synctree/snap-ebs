@@ -1,5 +1,4 @@
 ---
-
 mongod_pkgs:
   - mongodb-org
   - python-selinux

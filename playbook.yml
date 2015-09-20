@@ -30,8 +30,12 @@
       host: "%"
       password: password
 
+    # if you encounter an ID collision, you should buy a lottery ticket
+    mysql_server_id: "{{ 4294967295 | random }}"
+
     mongod_smallfiles: "true"
     mongod_port: 27017
+    mongod_replication: true
     mongod_repl_servers: ["master", "slave-wt", "slave-mmap"]
     mongod_repl_master: "master"
     mongod_replset_name: snap-ebs

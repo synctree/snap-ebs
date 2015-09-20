@@ -13,7 +13,7 @@ class SnapEbs::Plugin::MysqlPlugin < SnapEbs::Plugin
     {
       shutdown: 'no',
       username: 'root',
-      password: nil,
+      password: 'root',
       port: 3306,
       host: 'localhost'
     }
@@ -22,12 +22,13 @@ class SnapEbs::Plugin::MysqlPlugin < SnapEbs::Plugin
   def before
     require 'mysql2'
     return logger.error "This appears to be a master in a replication set. Refusing to operate." if master?
-    stop_mysql
+    stop_mysql if options.shutdown == 'yes'
   end
 
   def after
     return logger.error "This appears to be a master in a replication set. Refusing to operate." if master?
-    start_mysql
+  ensure
+    start_mysql if options.shutdown == 'yes'
   end
 
   def name
@@ -61,10 +62,12 @@ class SnapEbs::Plugin::MysqlPlugin < SnapEbs::Plugin
   end
 
   def stop_mysql
+    # TODO
     system("service mysql stop")
   end
 
   def start_mysql
+    # TODO
     system("service mysql start")
   end
 end

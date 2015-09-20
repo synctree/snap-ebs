@@ -1,9 +1,0 @@
----
-mongod_storage_engine: mmapv1
-mongod_pkgs:
-  - python-selinux
-  - mongodb-org
-  - python-pymongo
-
-mysql_server_id: "1"
-mysql_replication_role: 'master'
