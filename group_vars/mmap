@@ -1,0 +1,2 @@
+---
+mongod_storage_engine: mmapv1
