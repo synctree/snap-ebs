@@ -14,6 +14,5 @@ Gem::Specification.new do |s|
   s.require_path = 'lib'
   s.add_runtime_dependency "fog", '~> 1.31'
   s.add_runtime_dependency "httparty", '~> 0.13'
-  s.add_runtime_dependency "mysql", '~> 2.9'
   s.add_runtime_dependency "mongo", '~> 2.0'
 end

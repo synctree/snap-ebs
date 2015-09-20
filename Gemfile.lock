@@ -115,7 +115,6 @@ GEM
       bson (~> 3.0)
     multi_json (1.11.1)
     multi_xml (0.5.5)
-    mysql (2.9.1)
     net-scp (1.2.1)
       net-ssh (>= 2.6.5)
     net-ssh (2.9.2)
@@ -142,5 +141,4 @@ DEPENDENCIES
   fog
   httparty
   mongo
-  mysql
   rspec
