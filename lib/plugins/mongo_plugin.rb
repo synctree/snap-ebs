@@ -65,7 +65,7 @@ class SnapEbs::Plugin::MongoPlugin < SnapEbs::Plugin
   def unlock_or_start_mongo
     (options.retry.to_i + 1).times do
       if wired_tiger?
-        return if carefully('start mongo') { start_mongo } if options.shutdown
+        return if options.shutdown && carefully('start mongo') { start_mongo }
       else
         return if carefully('unlock mongo') { unlock_mongo }
       end
