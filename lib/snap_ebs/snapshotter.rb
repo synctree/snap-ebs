@@ -8,18 +8,22 @@ module SnapEbs::Snapshotter
   # Takes snapshots of attached volumes (optionally filtering by volumes
   # mounted to the given directories)
   def take_snapshots
-    system 'sync'
-    attached_volumes.collect do |vol|
-      dir = device_to_directory device_name vol
-      fs_freeze dir if options[:fs_freeze]
-      next unless should_snap vol
-      logger.debug "Snapping #{vol.id}"
-      snapshot = compute.snapshots.new
-      snapshot.volume_id = vol.id
-      snapshot.description = snapshot_name(vol)
-      snapshot.save
-      snapshot
-      fs_unfreeze dir if options[:fs_freeze]
+    carefully 'take snapshots' do
+      system 'sync'
+      attached_volumes.collect do |vol|
+        dir = device_to_directory device_name vol
+        fs_freeze dir if options[:fs_freeze]
+        next unless should_snap vol
+        logger.debug "Snapping #{vol.id}"
+        carefully "take snapshots for #{vol.id}" do
+          snapshot = compute.snapshots.new
+          snapshot.volume_id = vol.id
+          snapshot.description = snapshot_name(vol)
+          snapshot.save
+          snapshot
+        end
+        fs_unfreeze dir if options[:fs_freeze]
+      end
     end
   end
 
