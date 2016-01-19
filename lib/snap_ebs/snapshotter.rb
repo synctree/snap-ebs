@@ -8,22 +8,28 @@ module SnapEbs::Snapshotter
   # Takes snapshots of attached volumes (optionally filtering by volumes
   # mounted to the given directories)
   def take_snapshots
-    carefully 'take snapshots' do
+    begin
       system 'sync'
-      attached_volumes.collect do |vol|
+      attached_volumes.each do |vol|
         dir = device_to_directory device_name vol
         fs_freeze dir if options[:fs_freeze]
         next unless should_snap vol
         logger.debug "Snapping #{vol.id}"
-        carefully "take snapshots for #{vol.id}" do
+        begin
           snapshot = compute.snapshots.new
           snapshot.volume_id = vol.id
           snapshot.description = snapshot_name(vol)
           snapshot.save
           snapshot
+        rescue StandardError => e
+          logger.warn "Received error while snapping #{vol.id}:"
+          logger.warn e
         end
         fs_unfreeze dir if options[:fs_freeze]
       end
+    rescue StandardError => e
+      logger.warn "Received error while walking volumes:"
+      logger.warn e
     end
   end
 
