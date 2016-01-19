@@ -21,13 +21,23 @@ class SnapEbs::Plugin::MysqlPlugin < SnapEbs::Plugin
 
   def before
     require 'mysql2'
-    return logger.error "This appears to be a master in a replication set. Refusing to operate." if master?
+    if master?
+      logger.error "This appears to be a master in a replication set. Refusing to operate."
+      return false
+    end
+    lock_tables
     stop_mysql if options.shutdown == 'yes'
+    true
   end
 
   def after
-    return logger.error "This appears to be a master in a replication set. Refusing to operate." if master?
+    if master?
+      logger.error "This appears to be a master in a replication set. Refusing to operate."
+      return false
+    end
+    true
   ensure
+    unlock_tables
     start_mysql if options.shutdown == 'yes'
   end
 
@@ -46,6 +56,15 @@ class SnapEbs::Plugin::MysqlPlugin < SnapEbs::Plugin
       @slave = logger.debug client.query("SHOW SLAVE STATUS").to_a.any?
     end
     @slave 
+  end
+
+  def lock_tables
+    client.query("FLUSH LOCAL TABLES")
+    client.query("FLUSH LOCAL TABLES WITH READ LOCK")
+  end
+
+  def unlock_tables
+    client.query("UNLOCK TABLES")
   end
 
   # > If you see no Binlog Dump threads on a master server, this means that
