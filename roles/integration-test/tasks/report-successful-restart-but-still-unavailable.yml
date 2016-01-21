@@ -8,22 +8,21 @@
   shell: socat TCP-LISTEN:2701,fork TCP:localhost:{{ mongod_port }}
   async: 60
   poll: 0
-  ignore_errors: true
   args:
     executable: /bin/bash
 
-  # this works because nc will block until mongod closes the connection (when
-  # it is shutdown by snap-ebs), at which point the pkill line will execute
+  # this works because the second socat will block until mongod closes the
+  # connection (when it is shutdown by snap-ebs), at which point the pkill
+  # line will execute (and kill the socat above)
 - name: kill the forwarder when mongo dies
-  shell: nc -d localhost 27017 ; pkill socat
+  shell: socat -U - tcp:localhost:{{ mongod_port }} ; pkill socat
   async: 60
   poll: 0
-  ignore_errors: true
   args:
     executable: /bin/bash
 
 - name: 'run against a server that reports a successful restart, then is still unavailable'
-  shell: bash -lc './bin/snap-ebs -a 'dummy' -s 'dummy' -m --mongo --mongo-port 2701 --mongo-shutdown yes --mongo-user {{ mongod_user }} --mongo-password {{ mongod_password }} --mongo-server-selection-timeout 1 --mongo-connection-timeout 1 --mongo-socket-timeout 1' chdir=/home/{{ ansible_ssh_user }}/snap-ebs
+  shell: bash -lc './bin/snap-ebs -a 'dummy' -s 'dummy' -m --mongo --mongo-port 2701 --mongo-shutdown yes --mongo-user {{ mongod_user }} --mongo-password {{ mongod_password }} --mongo-server-selection-timeout 1 --mongo-connect-timeout 1 --mongo-socket-timeout 1' chdir=/home/{{ ansible_ssh_user }}/snap-ebs
   register: test_output
   ignore_errors: true
   async: 60

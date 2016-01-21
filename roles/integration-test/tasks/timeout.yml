@@ -5,7 +5,7 @@
   ignore_errors: true
 
 - name: bind netcat to 2701
-  shell: nohup nc -dkl 2701 &
+  shell: nohup socat -u tcp-listen:localhost:2701 - &
   ignore_errors: true
 
 - name: 'run tests against a cluster that always times out'
