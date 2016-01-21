@@ -14,7 +14,7 @@ class SnapEbs::Plugin::MongoPlugin < SnapEbs::Plugin
       host: 'Mongo host',
       server_selection_timeout: 'Timeout in seconds while choosing a server to connect to (default 30)',
       wait_queue_timeout: 'Timeout in seconds while waiting for a connection in the pool (default 1)',
-      connection_timeout: 'Timeout in seconds to wait for a socket to connect (default 5)',
+      connect_timeout: 'Timeout in seconds to wait for a socket to connect (default 5)',
       socket_timeout: 'Timeout in seconds to wait for an operation to execute on a socket (default 5)'
     }
   end
@@ -29,7 +29,7 @@ class SnapEbs::Plugin::MongoPlugin < SnapEbs::Plugin
       host: 'localhost',
       server_selection_timeout: 30,
       wait_queue_timeout: 1,
-      connection_timeout: 5,
+      connect_timeout: 5,
       socket_timeout: 5
     }
   end
@@ -149,7 +149,7 @@ class SnapEbs::Plugin::MongoPlugin < SnapEbs::Plugin
       password: options.password,
       server_selection_timeout: options.server_selection_timeout.to_i,
       wait_queue_timeout: options.wait_queue_timeout.to_i,
-      connection_timeout: options.connection_timeout.to_i,
+      connect_timeout: options.connect_timeout.to_i,
       socket_timeout: options.socket_timeout.to_i
     }
   end
