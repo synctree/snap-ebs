@@ -1,5 +1,7 @@
 ---
 - include: prepare-for-test.yml
+  tags:
+    - test
 
   # we'll create a fowarder on port 2701, then kill it when the real mongo
   # process dies. since our test is running against the forwarder, this simulates the case
@@ -10,6 +12,8 @@
   poll: 0
   args:
     executable: /bin/bash
+  tags:
+    - test
 
   # this works because the second socat will block until mongod closes the
   # connection (when it is shutdown by snap-ebs), at which point the pkill
@@ -20,6 +24,8 @@
   poll: 0
   args:
     executable: /bin/bash
+  tags:
+    - test
 
 - name: 'run against a server that reports a successful restart, then is still unavailable'
   shell: bash -lc './bin/snap-ebs -a 'dummy' -s 'dummy' -m --mongo --mongo-port 2701 --mongo-shutdown yes --mongo-user {{ mongod_user }} --mongo-password {{ mongod_password }} --mongo-server-selection-timeout 1 --mongo-connect-timeout 1 --mongo-socket-timeout 1' chdir=/home/{{ ansible_ssh_user }}/snap-ebs
@@ -27,9 +33,15 @@
   ignore_errors: true
   async: 60
   poll: 5
+  tags:
+    - test
 
 - include: print-results.yml
+  tags:
+    - test
 
 - assert:
     that: test_output|succeeded
     that: '"ERROR" in test_output.stdout'
+  tags:
+    - test

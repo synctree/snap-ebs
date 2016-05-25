@@ -2,18 +2,30 @@
 - name: kill netcat
   shell: pkill nc
   ignore_errors: true
+  tags:
+    - test
 
 - name: kill socat
   shell: pkill socat
   ignore_errors: true
+  tags:
+    - test
 
 - name: ensure mongod is executable
   shell: chmod +x /usr/bin/mongod
+  tags:
+    - test
 
 - name: ensure mongo is running
   service: name=mongod state=started
+  tags:
+    - test
 
 - name: ensure mysql is running
   service: name={{ mysql_daemon }} state=started
+  tags:
+    - test
 
 - wait_for: port={{ mongod_port }}
+  tags:
+    - test

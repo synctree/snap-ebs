@@ -1,2 +1,0 @@
----
-mongod_storage_engine: wiredTiger

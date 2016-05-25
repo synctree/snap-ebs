@@ -1,8 +1,12 @@
 ---
 - include: prepare-for-test.yml
+  tags:
+    - test
 
 - name: prevent mongod from restarting
   shell: chmod -x `which mongod`
+  tags:
+    - test
 
 - name: 'run against a server that fails to restart'
   shell: bash -lc './bin/snap-ebs -a 'dummy' -s 'dummy' -m --mongo --mongo-port {{ mongod_port }} --mongo-shutdown yes --mongo-user {{ mongod_user }} --mongo-password {{ mongod_password }} --mongo-server-selection-timeout 1 --mongo-connect-timeout 1 --mongo-socket-timeout 1 --mongo-retry 1 --mongo-interval 1' chdir=/home/{{ ansible_ssh_user }}/snap-ebs
@@ -10,11 +14,17 @@
   ignore_errors: true
   async: 60
   poll: 5
+  tags:
+    - test
 
 - include: print-results.yml
+  tags:
+    - test
 
 - assert:
     that: test_output|succeeded
     that: '"ERROR" in test_output.stdout'
     that: '"retrying" in test_output.stdout'
     that: '"still accessible" in test_output.stdout'
+  tags:
+    - test

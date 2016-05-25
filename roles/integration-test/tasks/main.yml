@@ -7,9 +7,8 @@
   - libmysqlclient-dev
   - socat
   when: ansible_os_family == "Debian"
-
-- name: Determine whether this is a master node
-  set_fact: i_am_master="{{ (mongod_repl_master == inventory_hostname) or (mongod_repl_master == ansible_hostname) }}"
+  tags:
+    - test
 
 - name: 'Install needed system libs'
   yum: name={{ item }} state=installed
@@ -17,23 +16,47 @@
   - mariadb-devel
   - socat
   when: ansible_os_family == "RedHat"
+  tags:
+    - test
+
+- name: Determine whether this is a master node
+  set_fact: i_am_master="{{ (mongod_repl_master == inventory_hostname) or (mongod_repl_master == ansible_hostname) }}"
+  tags:
+    - test
+
+- name: 'install bundler'
+  shell: bash -lc 'rvm default do gem install bundler' chdir=/home/{{ ansible_ssh_user }}/snap-ebs
+  tags:
+    - test
 
 - name: 'bundle install'
   shell: bash -lc 'bundle install' chdir=/home/{{ ansible_ssh_user }}/snap-ebs
+  tags:
+    - test
 
 - name: 'read mongodb password'
   shell: cat /tmp/mongod_password
   register: mongod_password_content
   when: mongod_password is not defined
+  tags:
+    - test
 
 - name: 'set mongodb password'
   set_fact: mongod_password={{ mongod_password_content.stdout }}
   when: mongod_password is not defined
+  tags:
+    - test
 
 - include: nominal.yml
+  tags:
+    - test
 
 - include: fail-to-restart.yml
   when: mongod_storage_engine == 'wiredTiger'
+  tags:
+    - test
 
 - include: report-successful-restart-but-still-unavailable.yml
   when: mongod_storage_engine == 'wiredTiger'
+  tags:
+    - test

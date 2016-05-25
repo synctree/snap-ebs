@@ -51,17 +51,9 @@ Vagrant.configure(VAGRANT_FILE_API_VERSION) do |config|
     # for some reason the ansible provisioner only runs concurrently with the
     # correct facts when the definition is in the last box...
     s.vm.provision "ansible" do |ansible|
-      ansible.groups = {
-        master:     %w(master),
-        slave:      %w(slave-mmap slave-wt),
-        standalone: %w(standalone),
-        centos:     %w(slave-wt),
-        mmap:       %w(master slave-mmap),
-        wt:         %w(standalone slave-wt)
-      }
-
       ansible.playbook = 'playbook.yml'
       ansible.limit = 'all'
+      # ansible.raw_arguments = ["-t","test"]
     end
   end
 end

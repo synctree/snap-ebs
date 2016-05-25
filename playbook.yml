@@ -4,12 +4,11 @@
   sudo: yes
   roles:
     - vagrant
-    - geerlingguy.mysql 
+    - mysql 
     - mongo
     - rvm_io.rvm1-ruby
-    - role: integration-test
-      tags:
-        - 'test'
+    - integration-test
+
   vars:
     mysql_root_password: password
     mysql_databases:
