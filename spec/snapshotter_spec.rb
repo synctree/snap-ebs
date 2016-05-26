@@ -24,15 +24,16 @@ describe SnapEbs::Snapshotter do
   end
 
   context "take_snapshots" do
-    before() { SnapEbs.logger = spy 'logger' }
+    before(:each) { SnapEbs.logger = logger }
     let(:attachedVolume1) { spy('attachedVolume1') }
     let(:attachedVolume2) { spy('attachedVolume2') }
-    let(:detachedVolume1) { spy('detachedVolume1') }
     let(:compute_snapshots) { spy('compute.snapshots') }
+    let(:detachedVolume1) { spy('detachedVolume1') }
+    let(:logger) { spy ('logger') }
     let(:snapshot) { spy('snapshot') }
     let(:snapshots_taken) { snap_ebs.take_snapshots }
 
-    before do
+    before :each do
       snap_ebs.options[:directory] = '/foo,/bar'
       # *consistent* snapshots
       expect(snap_ebs).to receive(:system).once.with('sync')
@@ -46,7 +47,7 @@ describe SnapEbs::Snapshotter do
       allow(detachedVolume1).to receive_messages(server_id: nil,          id: "vol-00000003")
 
       MOCK_DEVICE_MAPPING.each do |dir,dev|
-        expect(snap_ebs).to receive(:`).at_least(:once).with("df -T #{dir} | grep dev").and_return(dev)
+        allow(snap_ebs).to receive(:`).at_least(:once).with("df -T #{dir} | grep dev").and_return(dev)
       end
 
       MOCK_DEVICE_MAPPING.each do |dir,dev|
@@ -62,7 +63,6 @@ describe SnapEbs::Snapshotter do
       expect(compute_snapshots).to receive(:new).twice { snapshot }
       expect(snapshot).to receive("volume_id=").with("vol-00000001")
       expect(snapshot).to receive("volume_id=").with("vol-00000002")
-      expect(snapshot).to receive(:save).twice
     end
 
     context "with --fs-freeze" do 
@@ -73,10 +73,33 @@ describe SnapEbs::Snapshotter do
         expect(snap_ebs).to receive(:system).with("fsfreeze -f /bar")
         expect(snap_ebs).not_to receive(:system).with("fsfreeze -u /foo")
         expect(snap_ebs).to receive(:system).with("fsfreeze -u /bar")
+        expect(snapshot).to receive(:save).twice
       end
 
       subject { snapshots_taken }
       it { is_expected.to be_an Array }
+    end
+
+    context "when AWS fails" do 
+      context "with a standard error" do
+        before do
+          expect(snapshot).to receive(:save).and_raise(StandardError.new("AWS error"))
+          expect(logger).to receive(:warn).at_least(:once)
+        end
+
+        subject { snapshots_taken }
+        it { is_expected.to be_an Array }
+      end
+
+      context "with a fog aws error" do
+        before do
+          expect(snapshot).to receive(:save).and_raise(Fog::Compute::AWS::Error.new("AWS error"))
+          expect(logger).to receive(:warn).at_least(:once)
+        end
+
+        subject { snapshots_taken }
+        it { is_expected.to be_an Array }
+      end
     end
   end
 end
