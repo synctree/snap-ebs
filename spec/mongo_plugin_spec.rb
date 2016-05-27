@@ -49,11 +49,10 @@ describe SnapEbs::Plugin::MongoPlugin do
   context "when connection times out" do
     before :each do
       expect(Mongo::Client).to receive(:new).and_raise(Mongo::Error::NoServerAvailable, "nobody's home!").at_least(1)
-      plugin.before
     end
 
-    subject { plugin }
-    it { is_expected.to be}
+    subject { plugin.before }
+    it { is_expected.not_to be}
   end
 
   context "with authentication enabled" do

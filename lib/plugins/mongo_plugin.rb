@@ -37,7 +37,7 @@ class SnapEbs::Plugin::MongoPlugin < SnapEbs::Plugin
   def before
     require 'mongo'
     Mongo::Logger.logger = logger
-    return false unless safe_to_operate?
+    return false unless carefully('check if we can operate safely') { safe_to_operate? }
 
     if wired_tiger?
       logger.info "Wired Tiger storage engine detected"
@@ -96,12 +96,10 @@ class SnapEbs::Plugin::MongoPlugin < SnapEbs::Plugin
   end
 
   def primary?
-    carefully 'check whether this node is a primary' do
-      if @primary.nil?
-        @primary = client.command(isMaster: 1).first['ismaster']
-      end
-      @primary
+    if @primary.nil?
+      @primary = client.command(isMaster: 1).first['ismaster']
     end
+    @primary
   end
 
   def standalone?
