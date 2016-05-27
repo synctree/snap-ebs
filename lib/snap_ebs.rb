@@ -46,7 +46,10 @@ class SnapEbs
       next unless plugin.options.enable
       begin
         # we don't snap unless all plugin.before calls return a truthy value
-        ok = ok && plugin.before
+        unless plugin.before
+          plugin.options.enable = false
+          ok = false
+        end
       rescue => e
         logger.error "Encountered error while running the #{plugin.name} plugin's before hook"
         logger.error e

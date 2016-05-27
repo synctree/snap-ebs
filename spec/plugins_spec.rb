@@ -45,14 +45,27 @@ describe SnapEbs::Plugin do
       it { is_expected.to eql "foo" }
 
       context "then run" do
-        before do
-          expect(test_plugin).to receive(:before).and_call_original
-          expect(test_plugin).to receive(:after).and_call_original
-          expect(snap_ebs).to receive(:take_snapshots) # and don't call original
+        context "when before succeeds" do
+          before do
+            expect(test_plugin).to receive(:before).and_call_original
+            expect(test_plugin).to receive(:after).and_call_original
+            expect(snap_ebs).to receive(:take_snapshots) # and don't call original
+          end
+          before(:each) { snap_ebs.run }
+          subject { test_plugin }
+          it { is_expected.to be }
         end
-        before(:each) { snap_ebs.run }
-        subject { test_plugin }
-        it { is_expected.to be }
+
+        context "when before fails" do
+          before do
+            expect(test_plugin).to receive(:before).and_return(false)
+            expect(test_plugin).not_to receive(:after)
+            expect(snap_ebs).not_to receive(:take_snapshots)
+          end
+          before(:each) { snap_ebs.run }
+          subject { test_plugin }
+          it { is_expected.to be }
+        end
       end
     end
   end
