@@ -8,7 +8,7 @@ module SnapEbs::Snapshotter
   # Takes snapshots of attached volumes (optionally filtering by volumes
   # mounted to the given directories)
   def take_snapshots
-    result = []
+    snapped_volumes = []
     logger.debug "Issuing sync command"
     system 'sync'
 
@@ -22,20 +22,15 @@ module SnapEbs::Snapshotter
       end
 
       fs_freeze dir if options[:fs_freeze]
-      logger.debug "Snapping #{vol.id}"
-      snapshot = compute.snapshots.new
-      snapshot.volume_id = vol.id
-      snapshot.description = snapshot_name(vol)
-      retry_on_transient_error { logger.debug snapshot.save }
-      logger.debug "Snapshot saved for #{vol.id}"
+      take_snapshot vol
+      snapped_volumes.push vol
       fs_unfreeze dir if options[:fs_freeze]
-      result.push vol
     end
-    result
+    snapped_volumes
   end
 
   # Get the Fog compute object. When `--mock` is given, `Fog.mock!` is called
-  # and  information normally auto-detected from AWS is injected with dummy
+  # and information normally auto-detected from AWS is injected with dummy
   # values to circumvent the lazy loaders.
   def compute
     require 'fog/aws'
@@ -56,6 +51,19 @@ module SnapEbs::Snapshotter
   end
 
   private
+
+  def take_snapshot vol
+    logger.debug "Snapping #{vol.id}"
+    snapshot = compute.snapshots.new
+    snapshot.volume_id = vol.id
+    snapshot.description = snapshot_name(vol)
+
+    if retry_on_transient_error { snapshot.save }
+      logger.debug "Done saving snapshot for #{vol.id}"
+    else
+      logger.warn "Problems saving snapshot, see above"
+    end
+  end
 
   def attached_volumes
     logger.debug "Querying for volumes attached to this instance #{instance_id}"
