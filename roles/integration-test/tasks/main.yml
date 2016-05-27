@@ -20,7 +20,7 @@
     - test
 
 - name: Determine whether this is a master node
-  set_fact: i_am_master="{{ (mongod_repl_master == inventory_hostname) or (mongod_repl_master == ansible_hostname) }}"
+  set_fact: i_am_master="{{ (mongod_repl_master == inventory_hostname) or (mongod_repl_master == ansible_hostname) or (mongod_replication == False) }}"
   tags:
     - test
 

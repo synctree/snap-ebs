@@ -1,3 +1,4 @@
 ---
 mongod_storage_engine: mmapv1
 mysql_replication_role: 'slave'
+mysql_daemon: mysql

@@ -4,9 +4,11 @@ class SnapEbs::Plugin::Test < SnapEbs::Plugin
   end
 
   def before
+    true
   end
 
   def after
+    true
   end
 
   def name

@@ -21,10 +21,10 @@
   tags:
     - test
 
-- name: ensure mysql is running
-  service: name={{ mysql_daemon }} state=started
-  tags:
-    - test
+# - name: ensure mysql is running
+#   service: name={{ mysql_daemon }} state=started
+#   tags:
+#     - test
 
 - wait_for: port={{ mongod_port }}
   tags:

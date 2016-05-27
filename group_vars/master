@@ -2,3 +2,4 @@
 mongod_storage_engine: wiredTiger
 mysql_server_id: "1"
 mysql_replication_role: 'master'
+mysql_daemon: mysql

@@ -8,29 +8,30 @@ module SnapEbs::Snapshotter
   # Takes snapshots of attached volumes (optionally filtering by volumes
   # mounted to the given directories)
   def take_snapshots
-    begin
-      system 'sync'
-      attached_volumes.each do |vol|
-        dir = device_to_directory device_name vol
-        fs_freeze dir if options[:fs_freeze]
-        next unless should_snap vol
-        logger.debug "Snapping #{vol.id}"
-        begin
-          snapshot = compute.snapshots.new
-          snapshot.volume_id = vol.id
-          snapshot.description = snapshot_name(vol)
-          snapshot.save
-          snapshot
-        rescue StandardError => e
-          logger.warn "Received error while snapping #{vol.id}:"
-          logger.warn e
-        end
-        fs_unfreeze dir if options[:fs_freeze]
+    result = []
+    logger.debug "Issuing sync command"
+    system 'sync'
+
+    logger.debug "Walking attached volumes"
+    attached_volumes.each do |vol|
+      dir = device_to_directory device_name vol
+      logger.debug "Found #{vol.id} mounted on #{dir}"
+      unless should_snap vol
+        logger.debug "Skipping #{vol.id}"
+        next
       end
-    rescue StandardError => e
-      logger.warn "Received error while walking volumes:"
-      logger.warn e
+
+      fs_freeze dir if options[:fs_freeze]
+      logger.debug "Snapping #{vol.id}"
+      snapshot = compute.snapshots.new
+      snapshot.volume_id = vol.id
+      snapshot.description = snapshot_name(vol)
+      retry_on_transient_error { logger.debug snapshot.save }
+      logger.debug "Snapshot saved for #{vol.id}"
+      fs_unfreeze dir if options[:fs_freeze]
+      result.push vol
     end
+    result
   end
 
   # Get the Fog compute object. When `--mock` is given, `Fog.mock!` is called
@@ -38,13 +39,14 @@ module SnapEbs::Snapshotter
   # values to circumvent the lazy loaders.
   def compute
     require 'fog/aws'
+    logger.debug "Mock: #{options[:mock]}"
     if options[:mock]
       Fog.mock!
       @region = 'us-east-1'
-      @instance_id = 'i-deadbeef'
       @instance_name = 'totally-not-the-cia'
     end
 
+    logger.debug "AWS region auto-detected as #{region}"
     @compute ||= Fog::Compute.new({
       :aws_access_key_id => access_key,
       :aws_secret_access_key => secret_key,
@@ -56,7 +58,8 @@ module SnapEbs::Snapshotter
   private
 
   def attached_volumes
-    @attached_volumes ||= compute.volumes.select { |vol| vol.server_id == instance_id }
+    logger.debug "Querying for volumes attached to this instance #{instance_id}"
+    @attached_volumes ||= (retry_on_transient_error { compute.volumes.select { |vol| vol.server_id == instance_id } } || [])
   end
 
   def access_key
@@ -72,7 +75,11 @@ module SnapEbs::Snapshotter
   end
 
   def instance_id
-    @instance_id ||= JSON.parse(HTTParty.get(AWS_INSTANCE_ID_URL))["instanceId"]
+    if options[:mock]
+      @instance_id = 'i-deadbeef'
+    else
+      @instance_id ||= JSON.parse(HTTParty.get(AWS_INSTANCE_ID_URL))["instanceId"]
+    end
   end
 
   def instance_name
@@ -120,12 +127,33 @@ module SnapEbs::Snapshotter
   end
 
   def fs_freeze dir
+    logger.debug "Preparing to freeze #{dir}"
     return logger.warn "Refusing to freeze #{dir}, which is the root device (#{directory_to_device dir})" if is_root_device? dir
     system("#{fs_freeze_command} -f #{dir}")
   end
 
   def fs_unfreeze dir
+    logger.debug "Preparing to unfreeze #{dir}"
     return logger.warn "Refusing to unfreeze #{dir}, which is the root device (#{directory_to_device dir})" if is_root_device? dir
     system("#{fs_freeze_command} -u #{dir}")
+  end
+
+  # Retries the given block options.retry_count times while it raises transient AWS
+  # API errors. Returns nil if the number of attempts has been exceeded
+  def retry_on_transient_error
+    (options.retry_count.to_i + 1).times do |n|
+      logger.debug "Attempt ##{n}"
+      begin
+        result = yield
+      rescue Fog::Compute::AWS::Error => e
+        sleep_seconds = options.retry_interval * (n+1)
+        logger.warn "Received AWS error: #{e}"
+        logger.warn "Sleeping #{sleep_seconds} seconds before retrying"
+        sleep sleep_seconds
+      else
+        return result
+      end
+    end
+    nil
   end
 end

@@ -41,16 +41,19 @@ class SnapEbs
   # standard exceptions (i.e. out of memory or keyboard interrupt) will still
   # cause a execution to abort.
   def run
+    ok = true
     plugins.each do |plugin|
+      next unless plugin.options.enable
       begin
-        plugin.before if plugin.options.enable
+        # we don't snap unless all plugin.before calls return a truthy value
+        ok = ok && plugin.before
       rescue => e
         logger.error "Encountered error while running the #{plugin.name} plugin's before hook"
         logger.error e
       end
     end
 
-    take_snapshots
+    take_snapshots if ok
 
     plugins.each do |plugin|
       begin
@@ -66,7 +69,12 @@ class SnapEbs
   def execute
     option_parser.parse!
     logger.debug "Debug logging enabled"
-    run
+    begin
+      run
+    rescue Exception => e
+      logger.fatal "Encountered exception #{e}"
+      e.backtrace.map { |x| logger.fatal x }
+    end
   end
 
   # Get the global logger instance

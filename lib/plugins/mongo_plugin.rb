@@ -37,7 +37,7 @@ class SnapEbs::Plugin::MongoPlugin < SnapEbs::Plugin
   def before
     require 'mongo'
     Mongo::Logger.logger = logger
-    return unless safe_to_operate?
+    return false unless safe_to_operate?
 
     if wired_tiger?
       logger.info "Wired Tiger storage engine detected"
@@ -46,6 +46,8 @@ class SnapEbs::Plugin::MongoPlugin < SnapEbs::Plugin
       logger.info "MMAPv1 storage engine detected"
       carefully('lock mongo') { lock_mongo }
     end
+
+    true
   end
 
   def after

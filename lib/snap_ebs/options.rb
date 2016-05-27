@@ -43,6 +43,14 @@ class SnapEbs
             options.directory = d
           end
 
+          o.on("-r", "--retry-count COUNT", "Retry AWS API calls COUNT times before failing (default: #{options.retry_count})") do |count|
+            options.retry_count = count
+          end
+
+          o.on("-i", "--retry-interval SECONDS", "Wait the given number of seconds between API retries (default: #{options.retry_interval})") do |seconds|
+            options.retry_interval = seconds.to_i
+          end
+
           o.on("", "--version", "Show version and exit") do |d|
             puts "snap-ebs v#{::SnapEbs::VERSION}"
             exit 0
@@ -58,6 +66,15 @@ class SnapEbs
 
   # Get the root `options` object, and instance of OpenStruct
   def options
-    @options ||= OpenStruct.new
+    @options ||= OpenStruct.new(default_options)
+  end
+
+  private
+
+  def default_options
+    {
+      retry_count: 100,
+      retry_interval: 10
+    }
   end
 end
